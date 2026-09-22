@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -419,5 +420,70 @@ class LearnerViewModel(
      */
     fun openStaffDialog(open: Boolean) {
         _uiState.update { it.copy(isStaffNoticeDialogOpen = open) }
+    }
+
+    /**
+     * Resets the session restoration flag and reapplies the Phase 6 active task derivation
+     * to evaluate current persisted progress (used when resuming from Staff Mode).
+     */
+    fun restoreSessionFromProgress() {
+        hasRestoredSession = false
+        val repo = activeRepository ?: return
+        viewModelScope.launch {
+            val scheduledTasks = repo.getScheduledTasks(scheduleDate).firstOrNull() ?: return@launch
+            val allProgress = repo.getAllTaskProgress().firstOrNull() ?: return@launch
+            val progressMap = allProgress.associateBy { it.taskId }
+            if (scheduledTasks.isEmpty()) return@launch
+
+            val inProgressItem = scheduledTasks.firstOrNull {
+                val status = progressMap[it.task.id]?.status
+                status == "IN_PROGRESS" || status == "CHECKING"
+            }
+            val activeItem = inProgressItem ?: scheduledTasks.firstOrNull {
+                progressMap[it.task.id]?.status != "COMPLETED"
+            }
+
+            if (activeItem != null) {
+                val activeProgress = progressMap[activeItem.task.id]
+                if (activeProgress != null) {
+                    hasRestoredSession = true
+                    when (activeProgress.status) {
+                        "IN_PROGRESS" -> {
+                            val restoredStepIndex = (activeProgress.currentStep - 1).coerceAtLeast(0)
+                            _uiState.update {
+                                it.copy(
+                                    currentScreen = LearnerScreen.HOW,
+                                    currentStepIndex = restoredStepIndex
+                                )
+                            }
+                        }
+                        "CHECKING" -> {
+                            _uiState.update {
+                                it.copy(
+                                    currentScreen = LearnerScreen.CHECK,
+                                    currentStepIndex = (it.totalSteps - 1).coerceAtLeast(0)
+                                )
+                            }
+                        }
+                        else -> {
+                            _uiState.update {
+                                it.copy(
+                                    currentScreen = LearnerScreen.TODAY,
+                                    currentStepIndex = 0
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            currentScreen = LearnerScreen.TODAY,
+                            currentStepIndex = 0
+                        )
+                    }
+                }
+                bindActiveTask(activeItem.task.id)
+            }
+        }
     }
 }

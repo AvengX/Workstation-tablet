@@ -75,7 +75,9 @@ fun StaffDashboardScreen(
     onExitStaff: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToTaskTemplates: () -> Unit = {},
-    onNavigateToScheduleManagement: () -> Unit = {}
+    onNavigateToScheduleManagement: () -> Unit = {},
+    onNavigateToBackupRestore: () -> Unit = {},
+    onNavigateToWorkstationPreview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -109,7 +111,10 @@ fun StaffDashboardScreen(
             title = "Workstation Preview",
             description = "Inspect the learner workstation interface and verify instructions as presented to learners.",
             icon = Icons.Filled.Visibility,
-            actionLabel = "Preview Workstation"
+            actionLabel = "Preview Workstation",
+            statusBadge = "Active",
+            isEnabled = true,
+            onClick = onNavigateToWorkstationPreview
         ),
         StaffFeatureItem(
             title = "Learner Progress",
@@ -121,7 +126,10 @@ fun StaffDashboardScreen(
             title = "Backup & Restore",
             description = "Export or restore workstation templates, configuration, and local database records.",
             icon = Icons.Filled.Storage,
-            actionLabel = "Manage Backup"
+            actionLabel = "Manage Backup",
+            statusBadge = "Active",
+            isEnabled = true,
+            onClick = onNavigateToBackupRestore
         )
     )
 

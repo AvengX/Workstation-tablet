@@ -1,5 +1,6 @@
 package com.example.learnerapp.data.repository
 
+import androidx.room.withTransaction
 import com.example.learnerapp.data.local.AppDatabase
 import com.example.learnerapp.data.local.DatabaseSeeder
 import com.example.learnerapp.data.local.entities.ChecklistProgressEntity
@@ -144,7 +145,8 @@ class RoomLearnerRepository(
                 description = taskEntity.description,
                 steps = domainSteps,
                 checklist = checklistItems,
-                completionPhrase = taskEntity.completionPhrase
+                completionPhrase = taskEntity.completionPhrase,
+                helpPhrase = taskEntity.helpPhrase
             )
         }
     }

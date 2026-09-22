@@ -30,16 +30,26 @@ data class TaskFormData(
 }
 
 /**
+ * Encapsulates derived learner workstation progress for a task template.
+ */
+data class TaskProgressInfo(
+    val status: String,
+    val currentStep: Int
+)
+
+/**
  * UI State for the Task Template Management feature.
  */
 data class TaskManagementUiState(
     val tasks: List<TaskEntity> = emptyList(),
+    val taskProgressMap: Map<String, TaskProgressInfo> = emptyMap(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
     val selectedTask: TaskEntity? = null,
     val formData: TaskFormData = TaskFormData(),
     val taskPendingDelete: TaskEntity? = null,
+    val taskPendingReset: TaskEntity? = null,
     val activeTaskProtectionWarning: String? = null,
     val showUnsavedChangesDialog: Boolean = false
 )
@@ -68,7 +78,7 @@ class TaskManagementViewModel(
     }
 
     /**
-     * Observes task templates from Room database.
+     * Observes task templates and learner progress from Room database.
      */
     fun loadTasks() {
         val repo = activeRepository ?: return
@@ -76,6 +86,14 @@ class TaskManagementViewModel(
             _uiState.update { it.copy(isLoading = true) }
             repo.observeTasks().collect { taskList ->
                 _uiState.update { it.copy(tasks = taskList, isLoading = false) }
+            }
+        }
+        viewModelScope.launch {
+            repo.observeAllProgress().collect { progressList ->
+                val map = progressList.associate {
+                    it.taskId to TaskProgressInfo(status = it.status, currentStep = it.currentStep)
+                }
+                _uiState.update { it.copy(taskProgressMap = map) }
             }
         }
     }
@@ -321,6 +339,45 @@ class TaskManagementViewModel(
 
     fun cancelDeleteTask() {
         _uiState.update { it.copy(taskPendingDelete = null) }
+    }
+
+    /**
+     * Prepares task progress reset and prompts staff confirmation dialog.
+     */
+    fun requestResetTask(task: TaskEntity) {
+        _uiState.update { it.copy(taskPendingReset = task) }
+    }
+
+    fun cancelResetTask() {
+        _uiState.update { it.copy(taskPendingReset = null) }
+    }
+
+    /**
+     * Confirms and executes task progress reset (clearing TaskProgress and ChecklistProgress).
+     * Template definitions, steps, checklists, and schedule items remain untouched.
+     */
+    fun confirmResetTask(onSuccess: () -> Unit = {}) {
+        val task = _uiState.value.taskPendingReset ?: return
+        val repo = activeRepository ?: return
+        viewModelScope.launch {
+            val result = repo.resetTaskProgress(task.id)
+            if (result.isSuccess) {
+                _uiState.update {
+                    it.copy(
+                        taskPendingReset = null,
+                        successMessage = "Task progress reset for \"${task.title}\"."
+                    )
+                }
+                onSuccess()
+            } else {
+                _uiState.update {
+                    it.copy(
+                        taskPendingReset = null,
+                        errorMessage = "Unable to reset progress. Please try again."
+                    )
+                }
+            }
+        }
     }
 
     fun dismissActiveTaskWarning() {

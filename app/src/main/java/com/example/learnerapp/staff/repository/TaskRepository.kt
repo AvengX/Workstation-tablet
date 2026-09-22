@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.example.learnerapp.data.local.AppDatabase
 import com.example.learnerapp.data.local.entities.ChecklistItemEntity
 import com.example.learnerapp.data.local.entities.TaskEntity
+import com.example.learnerapp.data.local.entities.TaskProgressEntity
 import com.example.learnerapp.data.local.entities.TaskStepEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -21,6 +22,8 @@ interface TaskRepository {
     suspend fun copyTask(originalTaskId: String): Result<TaskEntity>
     suspend fun deleteTask(taskId: String): Result<Unit>
     suspend fun isTaskActiveInLearnerProgress(taskId: String): Boolean
+    fun observeAllProgress(): Flow<List<TaskProgressEntity>>
+    suspend fun resetTaskProgress(taskId: String): Result<Unit>
 
     // Task Steps
     fun observeSteps(taskId: String): Flow<List<TaskStepEntity>>
@@ -141,6 +144,19 @@ class RoomTaskRepository(
                 database.progressDao().deleteChecklistProgressForTask(taskId)
                 database.progressDao().deleteProgressForTask(taskId)
                 database.taskDao().deleteTaskById(taskId)
+            }
+        }
+    }
+
+    override fun observeAllProgress(): Flow<List<TaskProgressEntity>> {
+        return database.progressDao().observeAllProgress()
+    }
+
+    override suspend fun resetTaskProgress(taskId: String): Result<Unit> {
+        return runCatching {
+            database.withTransaction {
+                database.progressDao().deleteChecklistProgressForTask(taskId)
+                database.progressDao().deleteProgressForTask(taskId)
             }
         }
     }

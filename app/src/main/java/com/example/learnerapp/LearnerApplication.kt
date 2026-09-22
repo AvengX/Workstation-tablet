@@ -32,6 +32,10 @@ class LearnerApplication : Application() {
         com.example.learnerapp.staff.repository.RoomScheduleRepository(database)
     }
 
+    val backupRepository: com.example.learnerapp.staff.backup.BackupRepository by lazy {
+        com.example.learnerapp.staff.backup.RoomBackupRepository(database, this)
+    }
+
     override fun onCreate() {
         super.onCreate()
         instance = this

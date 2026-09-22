@@ -41,6 +41,7 @@ import com.example.learnerapp.ui.theme.TextMuted
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelpDialog(
+    helpPhrase: String = "Please ask a member of staff\nfor help with this step.",
     onDismiss: () -> Unit
 ) {
     BasicAlertDialog(
@@ -78,7 +79,7 @@ fun HelpDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Please ask a member of staff\nfor help with this step.",
+                    text = helpPhrase.ifBlank { "Please ask a member of staff\nfor help with this step." },
                     fontSize = 22.sp,
                     color = TextMuted,
                     textAlign = TextAlign.Center,

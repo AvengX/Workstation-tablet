@@ -12,16 +12,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.learnerapp.data.local.entities.TaskEntity
 import com.example.learnerapp.model.AppMode
+import com.example.learnerapp.staff.viewmodel.BackupRestoreViewModel
 import com.example.learnerapp.staff.viewmodel.ScheduleManagementViewModel
 import com.example.learnerapp.staff.viewmodel.StaffViewModel
 import com.example.learnerapp.staff.viewmodel.TaskContentViewModel
 import com.example.learnerapp.staff.viewmodel.TaskManagementViewModel
 import com.example.learnerapp.ui.screens.LearnerMainScreen
+import com.example.learnerapp.ui.staff.BackupRestoreScreen
 import com.example.learnerapp.ui.staff.ExitStaffDialog
+import com.example.learnerapp.ui.staff.LearnerPreviewScreen
 import com.example.learnerapp.ui.staff.ManageChecklistScreen
 import com.example.learnerapp.ui.staff.ManageStepsScreen
 import com.example.learnerapp.ui.staff.ScheduleManagementScreen
@@ -43,7 +48,9 @@ enum class StaffSubScreen {
     EDIT_TASK,
     MANAGE_STEPS,
     MANAGE_CHECKLIST,
-    SCHEDULE_MANAGEMENT
+    SCHEDULE_MANAGEMENT,
+    BACKUP_RESTORE,
+    LEARNER_PREVIEW
 }
 
 /**
@@ -58,6 +65,7 @@ class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskManagementViewModel by viewModels()
     private val taskContentViewModel: TaskContentViewModel by viewModels()
     private val scheduleViewModel: ScheduleManagementViewModel by viewModels()
+    private val backupViewModel: BackupRestoreViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +80,8 @@ class MainActivity : ComponentActivity() {
                         staffViewModel = staffViewModel,
                         taskViewModel = taskViewModel,
                         taskContentViewModel = taskContentViewModel,
-                        scheduleViewModel = scheduleViewModel
+                        scheduleViewModel = scheduleViewModel,
+                        backupViewModel = backupViewModel
                     )
                 }
             }
@@ -90,10 +99,13 @@ fun WorkstationApp(
     taskViewModel: TaskManagementViewModel,
     taskContentViewModel: TaskContentViewModel? = null,
     scheduleViewModel: ScheduleManagementViewModel? = null,
+    backupViewModel: BackupRestoreViewModel? = null,
     modifier: Modifier = Modifier
 ) {
     var currentMode by rememberSaveable { mutableStateOf(AppMode.LEARNER) }
     var staffSubScreen by rememberSaveable { mutableStateOf(StaffSubScreen.DASHBOARD) }
+    var previewTask by remember { mutableStateOf<TaskEntity?>(null) }
+    var previewPreviousSubScreen by rememberSaveable { mutableStateOf(StaffSubScreen.DASHBOARD) }
     val staffUiState by staffViewModel.uiState.collectAsState()
 
     // Enforce security invariant: cannot view Staff areas without active authentication
@@ -132,9 +144,14 @@ fun WorkstationApp(
                         staffSubScreen = StaffSubScreen.TASK_TEMPLATES
                     }
                 }
-                StaffSubScreen.SCHEDULE_MANAGEMENT -> {
+                StaffSubScreen.SCHEDULE_MANAGEMENT, StaffSubScreen.BACKUP_RESTORE -> {
                     BackHandler {
                         staffSubScreen = StaffSubScreen.DASHBOARD
+                    }
+                }
+                StaffSubScreen.LEARNER_PREVIEW -> {
+                    BackHandler {
+                        staffSubScreen = previewPreviousSubScreen
                     }
                 }
             }
@@ -184,6 +201,19 @@ fun WorkstationApp(
                         onNavigateToScheduleManagement = {
                             staffSubScreen = StaffSubScreen.SCHEDULE_MANAGEMENT
                         },
+                        onNavigateToBackupRestore = {
+                            staffSubScreen = StaffSubScreen.BACKUP_RESTORE
+                        },
+                        onNavigateToWorkstationPreview = {
+                            val tasks = taskViewModel.uiState.value.tasks
+                            val defaultTask = tasks.firstOrNull()
+                            if (defaultTask != null) {
+                                previewTask = defaultTask
+                                previewPreviousSubScreen = StaffSubScreen.DASHBOARD
+                                taskContentViewModel?.loadTask(defaultTask.id)
+                                staffSubScreen = StaffSubScreen.LEARNER_PREVIEW
+                            }
+                        },
                         modifier = modifier
                     )
                 }
@@ -208,6 +238,18 @@ fun WorkstationApp(
                         onManageChecklist = { task ->
                             taskContentViewModel?.loadTask(task.id)
                             staffSubScreen = StaffSubScreen.MANAGE_CHECKLIST
+                        },
+                        onPreviewTask = { task ->
+                            previewTask = task
+                            previewPreviousSubScreen = StaffSubScreen.TASK_TEMPLATES
+                            taskContentViewModel?.loadTask(task.id)
+                            staffSubScreen = StaffSubScreen.LEARNER_PREVIEW
+                        },
+                        onResumeTask = { task ->
+                            staffViewModel.logout()
+                            currentMode = AppMode.LEARNER
+                            staffSubScreen = StaffSubScreen.DASHBOARD
+                            learnerViewModel.restoreSessionFromProgress()
                         },
                         onExitStaff = {
                             staffViewModel.openExitDialog(true)
@@ -272,6 +314,35 @@ fun WorkstationApp(
                             },
                             onExitStaff = {
                                 staffViewModel.openExitDialog(true)
+                            },
+                            modifier = modifier
+                        )
+                    }
+                }
+                StaffSubScreen.BACKUP_RESTORE -> {
+                    backupViewModel?.let { vm ->
+                        BackupRestoreScreen(
+                            viewModel = vm,
+                            onBack = {
+                                staffSubScreen = StaffSubScreen.DASHBOARD
+                            },
+                            onExitStaff = {
+                                staffViewModel.openExitDialog(true)
+                            },
+                            modifier = modifier
+                        )
+                    }
+                }
+                StaffSubScreen.LEARNER_PREVIEW -> {
+                    val contentUiState = taskContentViewModel?.uiState?.collectAsState()?.value
+                    val targetTask = previewTask ?: contentUiState?.task ?: taskViewModel.uiState.collectAsState().value.tasks.firstOrNull()
+                    if (targetTask != null) {
+                        LearnerPreviewScreen(
+                            task = targetTask,
+                            steps = contentUiState?.steps ?: emptyList(),
+                            checklistItems = contentUiState?.checklist ?: emptyList(),
+                            onExitPreview = {
+                                staffSubScreen = previewPreviousSubScreen
                             },
                             modifier = modifier
                         )

@@ -117,7 +117,10 @@ fun LearnerMainScreen(
 
     // Modal dialogs
     if (uiState.isHelpDialogOpen) {
-        HelpDialog(onDismiss = { viewModel.openHelpDialog(false) })
+        HelpDialog(
+            helpPhrase = uiState.task.helpPhrase,
+            onDismiss = { viewModel.openHelpDialog(false) }
+        )
     }
 
     if (uiState.isStaffNoticeDialogOpen) {

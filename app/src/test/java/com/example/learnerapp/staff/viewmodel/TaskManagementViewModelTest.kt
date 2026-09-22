@@ -68,6 +68,19 @@ class FakeTaskRepository : TaskRepository {
         return Result.success(Unit)
     }
 
+    val progressFlow = MutableStateFlow<List<com.example.learnerapp.data.local.entities.TaskProgressEntity>>(emptyList())
+    var resetTaskCalledWith: String? = null
+
+    override fun observeAllProgress(): Flow<List<com.example.learnerapp.data.local.entities.TaskProgressEntity>> = progressFlow.asStateFlow()
+
+    override suspend fun resetTaskProgress(taskId: String): Result<Unit> {
+        if (shouldFailWrites) return Result.failure(RuntimeException("DB error"))
+        resetTaskCalledWith = taskId
+        progressFlow.value = progressFlow.value.filterNot { it.taskId == taskId }
+        activeTaskIds.remove(taskId)
+        return Result.success(Unit)
+    }
+
     // Step Stubs
     val stepsFlow = MutableStateFlow<List<com.example.learnerapp.data.local.entities.TaskStepEntity>>(emptyList())
     override fun observeSteps(taskId: String): Flow<List<com.example.learnerapp.data.local.entities.TaskStepEntity>> = stepsFlow.asStateFlow()

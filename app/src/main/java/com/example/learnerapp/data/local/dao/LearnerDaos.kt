@@ -42,6 +42,9 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE id = :taskId")
     suspend fun deleteTaskById(taskId: String)
+
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
 }
 
 @Dao
@@ -72,6 +75,12 @@ interface TaskStepDao {
 
     @Query("DELETE FROM task_steps WHERE taskId = :taskId")
     suspend fun deleteStepsForTask(taskId: String)
+
+    @Query("SELECT * FROM task_steps ORDER BY taskId, stepNumber ASC")
+    suspend fun getAllSteps(): List<TaskStepEntity>
+
+    @Query("DELETE FROM task_steps")
+    suspend fun deleteAllSteps()
 }
 
 @Dao
@@ -105,6 +114,12 @@ interface ChecklistDao {
 
     @Query("DELETE FROM checklist_items WHERE taskId = :taskId")
     suspend fun deleteItemsForTask(taskId: String)
+
+    @Query("SELECT * FROM checklist_items ORDER BY taskId, `order` ASC")
+    suspend fun getAllItems(): List<ChecklistItemEntity>
+
+    @Query("DELETE FROM checklist_items")
+    suspend fun deleteAllItems()
 }
 
 @Dao
@@ -144,6 +159,9 @@ interface ScheduleDao {
 
     @Query("DELETE FROM schedule_items WHERE taskId = :taskId")
     suspend fun deleteScheduleItemsForTask(taskId: String)
+
+    @Query("DELETE FROM schedule_items")
+    suspend fun deleteAllScheduleItems()
 }
 
 @Dao
@@ -198,4 +216,16 @@ interface ProgressDao {
 
     @Query("DELETE FROM task_progress WHERE taskId = :taskId")
     suspend fun deleteProgressForTask(taskId: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllProgress(progressList: List<TaskProgressEntity>)
+
+    @Query("SELECT * FROM checklist_progress")
+    suspend fun getAllChecklistProgress(): List<ChecklistProgressEntity>
+
+    @Query("DELETE FROM task_progress")
+    suspend fun deleteAllTaskProgress()
+
+    @Query("DELETE FROM checklist_progress")
+    suspend fun deleteAllChecklistProgress()
 }

@@ -53,7 +53,8 @@ data class Task(
     val description: String = "",
     val steps: List<TaskStep>,
     val checklist: List<ChecklistItem>,
-    val completionPhrase: String
+    val completionPhrase: String,
+    val helpPhrase: String = "Please ask a member of staff for help with this step."
 )
 
 /**
