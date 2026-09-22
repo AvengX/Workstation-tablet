@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workstation Tablet Simulator - Phase 6 (Schedule Management)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #0F172A;
+    }
+    .tablet-frame {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 14px #1e293b, 0 0 0 16px #334155;
+    }
+    .no-select {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 text-slate-900 no-select">
+
+  <!-- Tablet Bezel Container (10-11" Landscape Ratio: 16:10 / 1120x700) -->
+  <div class="tablet-frame relative w-[1120px] h-[700px] bg-[#F3F4F6] rounded-[32px] overflow-hidden flex flex-col border border-slate-700">
+    
+    <!-- MODE 1: LEARNER MODE WORKSTATION -->
+    <div id="mode-learner" class="flex-1 flex flex-row h-full overflow-hidden">
+      <!-- LEFT PERSISTENT NAVIGATION RAIL -->
+      <div class="w-[120px] h-full bg-[#16202E] flex flex-col items-center py-5 px-2.5 z-10 shrink-0 border-r border-slate-800">
+        <div class="w-8 h-1 bg-teal-500 rounded-full mb-6"></div>
+
+        <div class="flex flex-col gap-2.5 w-full" id="rail-items">
+          <button onclick="navigateTo('TODAY')" id="rail-TODAY" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all bg-[#0D7A75] text-white">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+            <span class="text-[12px] font-bold tracking-wider">TODAY</span>
+          </button>
+          <button onclick="navigateTo('NOW')" id="rail-NOW" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span class="text-[12px] font-semibold tracking-wider">NOW</span>
+          </button>
+          <button onclick="navigateTo('HOW')" id="rail-HOW" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm-1 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg>
+            <span class="text-[12px] font-semibold tracking-wider">HOW</span>
+          </button>
+          <button onclick="navigateTo('CHECK')" id="rail-CHECK" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span class="text-[12px] font-semibold tracking-wider">CHECK</span>
+          </button>
+          <button onclick="navigateTo('DONE')" id="rail-DONE" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 13.17l7.59-7.59L19 7l-9 10z"/></svg>
+            <span class="text-[12px] font-semibold tracking-wider">DONE</span>
+          </button>
+          <button onclick="navigateTo('NEXT')" id="rail-NEXT" class="rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200">
+            <svg class="w-7 h-7 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            <span class="text-[12px] font-semibold tracking-wider">NEXT</span>
+          </button>
+        </div>
+
+        <div class="mt-auto w-full pt-4 border-t border-slate-800">
+          <button onclick="switchMode('STAFF_PIN')" class="w-full h-12 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+            <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span class="text-[11px] font-bold">STAFF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT MAIN CONTENT WORK AREA -->
+      <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#F3F4F6]">
+        <!-- TOP WORKSTATION BAR -->
+        <div class="h-[64px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold tracking-widest text-[#006B75] bg-teal-50 px-3 py-1 rounded-full border border-teal-200">WORKSTATION 4</span>
+            <span class="text-xs font-semibold text-slate-500">PACKING DESK B</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg">OPERATOR: ALEX M.</span>
+            <button onclick="openHelpModal()" class="h-10 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+              I NEED HELP
+            </button>
+          </div>
+        </div>
+
+        <!-- SCREEN CONTAINER -->
+        <div class="flex-1 overflow-hidden relative">
+          <!-- SCREEN 1: TODAY -->
+          <div id="screen-TODAY" class="screen absolute inset-0 p-8 flex flex-col justify-between overflow-y-auto">
+            <div>
+              <h2 class="text-3xl font-extrabold text-[#16202E] tracking-tight mb-2">TODAY'S WORK</h2>
+              <p class="text-slate-500 text-base mb-6">Here is your plan for today. Tap START when you are ready.</p>
+              
+              <div id="today-cards-grid" class="grid grid-cols-3 gap-6">
+                <!-- Dynamically rendered by updateLearnerDynamicSchedule() -->
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+              <button onclick="navigateTo('NOW')" class="h-14 px-8 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-base rounded-2xl shadow-md transition-all active:scale-95 flex items-center gap-2">
+                VIEW CURRENT TASK
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 13h11.86l-5.43 5.43L12.85 19.85 20.7 12l-7.85-7.85-1.42 1.42L16.86 11H5v2z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 2: NOW -->
+          <div id="screen-NOW" class="screen absolute inset-0 p-8 flex flex-col justify-between hidden">
+            <div>
+              <div class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold tracking-widest mb-3">CURRENT ASSIGNMENT</div>
+              <h2 class="text-4xl font-extrabold text-[#16202E] tracking-tight mb-3">Pack one parcel</h2>
+              <p class="text-slate-600 text-lg leading-relaxed max-w-2xl">
+                Prepare, pack, seal, and label one parcel carefully following the instructions.
+              </p>
+            </div>
+
+            <div class="flex justify-between items-center pt-6 border-t border-slate-200">
+              <button onclick="navigateTo('TODAY')" class="h-14 px-6 border-2 border-slate-300 hover:bg-slate-100 text-slate-700 font-bold rounded-2xl transition-all">
+                BACK TO SCHEDULE
+              </button>
+              <button onclick="startTask()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
+                START TASK
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 3: HOW -->
+          <div id="screen-HOW" class="screen absolute inset-0 p-8 flex flex-col justify-between hidden">
+            <div class="flex-1 flex flex-col items-center justify-center">
+              <!-- Photograph / Placeholder Component -->
+              <div id="how-photo-box" class="w-[88%] h-[260px] bg-white rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col items-center justify-center p-6 text-center overflow-hidden relative">
+                <div id="how-photo-content" class="flex flex-col items-center justify-center">
+                  <div class="bg-slate-100 text-slate-800 px-4 py-2 rounded-xl flex items-center gap-2 mb-3">
+                    <svg class="w-6 h-6 text-[#006B75]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span id="how-photo-title" class="font-bold text-sm tracking-wider">STEP 1 PHOTO</span>
+                  </div>
+                  <p id="how-photo-desc" class="text-slate-600 text-base font-medium max-w-lg whitespace-pre-line leading-relaxed">
+                    Step 1 Photo Placeholder: Take the assigned item, box and packing materials.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Step Counter Badge -->
+              <div class="mt-4 mb-2 bg-slate-200 text-[#006B75] font-extrabold text-sm px-4 py-1.5 rounded-lg">
+                <span id="how-step-counter">Step 1 of 5</span>
+              </div>
+
+              <!-- Main Instruction Text -->
+              <h3 id="how-instruction" class="text-2xl font-extrabold text-slate-900 text-center max-w-2xl leading-tight">
+                Take the assigned item, box and packing materials.
+              </h3>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+              <button id="btn-prev-step" onclick="previousStep()" class="h-14 px-6 border-2 border-slate-300 text-slate-400 font-bold rounded-2xl cursor-not-allowed transition-all" disabled>
+                PREVIOUS
+              </button>
+              <button id="btn-next-step" onclick="nextStep()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-base rounded-2xl shadow-md transition-all active:scale-95">
+                NEXT STEP
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 4: CHECK -->
+          <div id="screen-CHECK" class="screen absolute inset-0 p-8 flex flex-col justify-between hidden">
+            <div>
+              <h2 class="text-3xl font-extrabold text-[#16202E] tracking-tight mb-1">CHECK YOUR WORK</h2>
+              <p class="text-slate-500 text-base mb-5">Tap each item after physically checking the completed parcel.</p>
+
+              <div class="flex flex-col gap-3 max-w-2xl" id="checklist-container">
+                <!-- Checklist cards dynamically generated -->
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t border-slate-200">
+              <button id="btn-continue-check" onclick="continueFromCheck()" class="h-14 px-10 bg-slate-200 text-slate-400 font-bold text-base rounded-2xl cursor-not-allowed transition-all" disabled>
+                CONTINUE
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 5: DONE -->
+          <div id="screen-DONE" class="screen absolute inset-0 p-8 flex flex-col items-center justify-center text-center hidden">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+              <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            </div>
+            <h2 class="text-4xl font-extrabold text-[#16202E] tracking-tight mb-3">TASK COMPLETE!</h2>
+            <div class="bg-white border-2 border-emerald-300 rounded-2xl p-6 max-w-xl mb-8 shadow-sm">
+              <p class="text-emerald-800 text-xl font-bold mb-1">"I have finished this task. Please check."</p>
+              <p class="text-slate-500 text-sm">Please inform your workstation supervisor for final verification.</p>
+            </div>
+
+            <button onclick="completeTask()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-2xl shadow-lg transition-all active:scale-95">
+              FINISH & NEXT TASK
+            </button>
+          </div>
+
+          <!-- SCREEN 6: NEXT -->
+          <div id="screen-NEXT" class="screen absolute inset-0 p-8 flex flex-col justify-between hidden">
+            <div>
+              <div class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold tracking-widest mb-3">UPCOMING TASK</div>
+              <h2 class="text-4xl font-extrabold text-[#16202E] tracking-tight mb-3">Sort supplies</h2>
+              <p class="text-slate-600 text-lg leading-relaxed max-w-2xl mb-6">
+                Your completed parcel has been recorded. Your next scheduled workstation assignment is Sort supplies.
+              </p>
+            </div>
+
+            <div class="flex justify-between items-center pt-6 border-t border-slate-200">
+              <button onclick="navigateTo('TODAY')" class="h-14 px-6 border-2 border-slate-300 hover:bg-slate-100 text-slate-700 font-bold rounded-2xl transition-all">
+                VIEW SCHEDULE
+              </button>
+              <button onclick="openNextTaskModal()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-2xl shadow-lg transition-all active:scale-95">
+                START SORT SUPPLIES
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 2: STAFF PIN AUTHENTICATION SCREEN -->
+    <div id="mode-pin" class="flex-1 flex flex-col items-center justify-center h-full bg-[#16202E] text-white hidden relative">
+      <button onclick="switchMode('LEARNER')" class="absolute top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-white text-sm font-semibold transition-all">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Back to Workstation
+      </button>
+
+      <div class="w-16 h-16 bg-teal-900/60 border border-teal-500/40 rounded-2xl flex items-center justify-center text-teal-400 mb-4 shadow-lg">
+        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+
+      <h2 class="text-2xl font-bold tracking-tight mb-1">Staff Access</h2>
+      <p class="text-slate-400 text-sm mb-6">Enter 4-digit staff PIN (Default: 1234)</p>
+
+      <!-- PIN Indicator Dots -->
+      <div class="flex gap-4 mb-6">
+        <div id="dot-0" class="w-4 h-4 rounded-full border-2 border-slate-500 bg-transparent transition-all"></div>
+        <div id="dot-1" class="w-4 h-4 rounded-full border-2 border-slate-500 bg-transparent transition-all"></div>
+        <div id="dot-2" class="w-4 h-4 rounded-full border-2 border-slate-500 bg-transparent transition-all"></div>
+        <div id="dot-3" class="w-4 h-4 rounded-full border-2 border-slate-500 bg-transparent transition-all"></div>
+      </div>
+
+      <!-- Error message -->
+      <div id="pin-error" class="text-red-400 text-sm font-semibold mb-4 h-5 hidden">Incorrect PIN. Please try again.</div>
+
+      <!-- Numeric Keypad -->
+      <div class="grid grid-cols-3 gap-3 w-[280px]">
+        <button onclick="pressPin('1')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">1</button>
+        <button onclick="pressPin('2')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">2</button>
+        <button onclick="pressPin('3')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">3</button>
+        <button onclick="pressPin('4')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">4</button>
+        <button onclick="pressPin('5')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">5</button>
+        <button onclick="pressPin('6')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">6</button>
+        <button onclick="pressPin('7')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">7</button>
+        <button onclick="pressPin('8')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">8</button>
+        <button onclick="pressPin('9')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">9</button>
+        <button onclick="clearPin()" class="h-14 rounded-2xl bg-slate-800/40 hover:bg-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider transition-all">Clear</button>
+        <button onclick="pressPin('0')" class="h-14 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-2xl font-bold shadow transition-all active:scale-95">0</button>
+        <button onclick="backspacePin()" class="h-14 rounded-2xl bg-slate-800/40 hover:bg-slate-800 flex items-center justify-center text-slate-400 transition-all">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MODE 3: STAFF DASHBOARD SCREEN -->
+    <div id="mode-dashboard" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-[#006B75]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight">STAFF DASHBOARD</h1>
+            <p class="text-xs text-slate-500">Supervision & Workstation Controls</p>
+          </div>
+        </div>
+        <button onclick="openExitStaffModal()" class="h-11 px-5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl font-bold text-xs tracking-wider transition-all flex items-center gap-2 active:scale-95">
+          <svg class="w-4 h-4 text-slate-600" fill="currentColor" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+          EXIT STAFF MODE
+        </button>
+      </div>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div class="grid grid-cols-3 gap-6 max-w-5xl">
+          <!-- Card 1: Task Templates (ACTIVE) -->
+          <div class="bg-white rounded-2xl p-5 border-2 border-teal-500 shadow-md flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-[#006B75]">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <span class="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">Active</span>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1">Task Templates</h3>
+              <p class="text-xs text-slate-500 leading-relaxed mb-4">Create, edit, duplicate, and manage workplace task templates and steps.</p>
+            </div>
+            <button onclick="switchMode('TASK_TEMPLATES')" class="w-full h-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-xs rounded-xl transition-all shadow-sm">Manage Templates</button>
+          </div>
+
+          <!-- Card 2: Learner Progress -->
+          <div class="bg-white rounded-2xl p-5 border-2 border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[#16202E]">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">Feature coming soon</span>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1">Learner Progress</h3>
+              <p class="text-xs text-slate-500 leading-relaxed mb-4">View active workstation learners, completion history, and checklist performance.</p>
+            </div>
+            <button disabled class="w-full h-10 bg-slate-100 text-slate-400 font-semibold text-xs rounded-xl cursor-not-allowed">View Progress</button>
+          </div>
+
+          <!-- Card 3: Daily Schedules -->
+          <div class="bg-white rounded-2xl p-5 border-2 border-slate-200 shadow-sm flex flex-col justify-between hover:border-teal-500 transition-all cursor-pointer" onclick="switchMode('SCHEDULE_MANAGEMENT')">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-[#006B75]">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+                </div>
+                <span class="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-full">Active</span>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1">Today's Schedule</h3>
+              <p class="text-xs text-slate-500 leading-relaxed mb-4">Assign, reorder, and schedule tasks into daily learner routines (NOW / NEXT / LATER).</p>
+            </div>
+            <button class="w-full h-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-xs rounded-xl shadow-sm transition-all">Configure Schedule</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 4: TASK TEMPLATES SCREEN -->
+    <div id="mode-templates" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="switchMode('STAFF_DASHBOARD')" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-[#16202E]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight">TASK TEMPLATES</h1>
+            <p class="text-xs text-slate-500">Manage workplace tasks & instructions</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openCreateTaskForm()" class="h-11 px-5 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            CREATE TASK
+          </button>
+          <button onclick="openExitStaffModal()" class="h-11 px-4 bg-slate-50 hover:bg-slate-100 text-slate-800 border-2 border-slate-300 rounded-xl font-bold text-xs transition-all active:scale-95">
+            EXIT STAFF MODE
+          </button>
+        </div>
+      </div>
+
+      <div id="templates-banner" class="hidden px-8 py-2.5 bg-emerald-50 border-b border-emerald-200 text-emerald-800 text-xs font-bold flex justify-between items-center">
+        <span id="templates-banner-text">Task created.</span>
+        <button onclick="document.getElementById('templates-banner').classList.add('hidden')" class="text-emerald-700 hover:text-emerald-900">✕</button>
+      </div>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div id="task-list-container" class="flex flex-col gap-4 max-w-5xl">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 5: CREATE / EDIT TASK FORM -->
+    <div id="mode-task-form" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="handleFormBack()" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-[#16202E]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight" id="form-screen-title">CREATE TASK</h1>
+            <p class="text-xs text-slate-500" id="form-screen-subtitle">Define a new workplace task template</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div class="grid grid-cols-2 gap-6 max-w-4xl">
+          <div class="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm flex flex-col gap-5">
+            <h3 class="text-base font-bold text-slate-900">Task Information</h3>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Task Name *</label>
+              <input id="form-task-title" oninput="markFormDirty()" type="text" placeholder="e.g. Pack one parcel" class="w-full h-11 px-3.5 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none">
+              <span id="form-title-error" class="text-xs font-semibold text-red-600 mt-1 hidden">Task name is required.</span>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Description</label>
+              <textarea id="form-task-desc" oninput="markFormDirty()" rows="3" placeholder="Describe the task purpose or workstation context" class="w-full p-3 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none"></textarea>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm flex flex-col gap-5">
+            <h3 class="text-base font-bold text-slate-900">Workstation Phrases</h3>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Help Phrase</label>
+              <textarea id="form-task-help" oninput="markFormDirty()" rows="3" class="w-full p-3 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Completion Phrase</label>
+              <textarea id="form-task-done" oninput="markFormDirty()" rows="3" class="w-full p-3 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-[72px] bg-white border-t border-slate-200 px-8 flex items-center justify-end gap-4 shrink-0 shadow-sm">
+        <button onclick="handleFormBack()" class="h-12 px-6 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button onclick="saveTaskForm()" class="h-12 px-8 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all active:scale-95">
+          SAVE
+        </button>
+      </div>
+    </div>
+
+    <!-- MODE 6: MANAGE TASK STEPS (PHASE 5) -->
+    <div id="mode-manage-steps" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="switchMode('TASK_TEMPLATES')" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-[#16202E]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight">TASK STEPS</h1>
+            <p class="text-xs text-slate-500" id="steps-screen-subtitle">Manage instruction steps</p>
+          </div>
+        </div>
+        <button onclick="openAddStepModal()" class="h-11 px-5 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          ADD STEP
+        </button>
+      </div>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div id="steps-list-container" class="flex flex-col gap-3.5 max-w-4xl">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 7: MANAGE CHECKLIST (PHASE 5) -->
+    <div id="mode-manage-checklist" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="switchMode('TASK_TEMPLATES')" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-[#16202E]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight">MANAGE CHECKLIST</h1>
+            <p class="text-xs text-slate-500" id="checklist-screen-subtitle">Verification items</p>
+          </div>
+        </div>
+        <button onclick="openAddChecklistModal()" class="h-11 px-5 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          ADD ITEM
+        </button>
+      </div>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div id="manage-checklist-container" class="flex flex-col gap-3.5 max-w-4xl">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 8: SCHEDULE MANAGEMENT (PHASE 6) -->
+    <div id="mode-schedule-management" class="flex-1 flex flex-col h-full overflow-hidden hidden bg-[#F8FAFC]">
+      <div class="h-[68px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="switchMode('STAFF_DASHBOARD')" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-[#16202E]">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold text-[#16202E] tracking-tight">TODAY'S SCHEDULE</h1>
+            <p class="text-xs text-slate-500">Assign, reorder, and structure workplace routines</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openScheduleAddModal()" class="h-11 px-5 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            ADD TASK
+          </button>
+          <button onclick="openExitStaffModal()" class="h-11 px-4 bg-slate-50 hover:bg-slate-100 text-slate-800 border-2 border-slate-300 rounded-xl font-bold text-xs transition-all active:scale-95">
+            EXIT STAFF MODE
+          </button>
+        </div>
+      </div>
+
+      <!-- DATE BAR -->
+      <div class="h-[60px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button onclick="schedulePrevDay()" class="w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center hover:bg-slate-50 active:scale-95 text-slate-700 font-bold transition-all">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <button onclick="openDatePickerModal()" class="h-10 px-4 rounded-xl border-2 border-slate-200 flex items-center gap-2.5 hover:bg-slate-50 text-slate-800 font-bold text-sm transition-all">
+            <svg class="w-4 h-4 text-teal-700" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+            <span id="schedule-date-display">Tuesday, 22 September 2026</span>
+          </button>
+          <button onclick="scheduleNextDay()" class="w-10 h-10 rounded-xl border-2 border-slate-200 flex items-center justify-center hover:bg-slate-50 active:scale-95 text-slate-700 font-bold transition-all">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </button>
+        </div>
+        <button id="schedule-btn-today" onclick="scheduleGoToday()" class="h-10 px-5 rounded-xl font-bold text-xs bg-teal-600 text-white shadow-sm hover:bg-teal-700 transition-all">
+          TODAY
+        </button>
+      </div>
+
+      <!-- SCHEDULE LIST -->
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div id="schedule-list-container" class="flex flex-col gap-3 max-w-4xl">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- HELP MODAL -->
+  <div id="modal-help" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-3">I NEED HELP</h3>
+      <p class="text-slate-600 text-lg mb-6 leading-relaxed">Please ask a member of staff for help with this step.</p>
+      <button onclick="closeHelpModal()" class="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg rounded-xl transition-all">
+        CLOSE
+      </button>
+    </div>
+  </div>
+
+  <!-- NEXT TASK PLACEHOLDER DIALOG -->
+  <div id="modal-next-task" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-sky-100 text-sky-700 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">NEXT TASK</h3>
+      <p class="text-slate-600 text-lg mb-6">Task 'Sort Supplies' coming in Phase 2</p>
+      <button onclick="closeNextTaskModal()" class="w-full h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-xl transition-all">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <!-- EXIT STAFF MODE CONFIRMATION -->
+  <div id="modal-exit-staff" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">Exit Staff Mode?</h3>
+      <p class="text-slate-600 text-base mb-6">Return to the learner workstation interface? Learner task progress remains unchanged.</p>
+      <div class="flex gap-3">
+        <button onclick="closeExitStaffModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          Cancel
+        </button>
+        <button onclick="confirmExitStaff()" class="flex-1 h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all">
+          Exit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE TASK CONFIRMATION MODAL -->
+  <div id="modal-delete-task" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">DELETE TASK?</h3>
+      <p id="delete-task-target-title" class="text-lg font-bold text-slate-800 mb-2">Task Title</p>
+      <p class="text-slate-500 text-sm mb-6">This will permanently remove this task template and all child steps.</p>
+      <div class="flex gap-3">
+        <button onclick="closeDeleteTaskModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button onclick="confirmDeleteTask()" class="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all">
+          DELETE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE TASK IN PROGRESS PROTECTION MODAL -->
+  <div id="modal-active-protection" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">Cannot Delete Task</h3>
+      <p class="text-slate-600 text-sm mb-6">This task is currently in progress and cannot be deleted.</p>
+      <button onclick="closeActiveProtectionModal()" class="w-full h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <!-- ACTIVE STEP IN PROGRESS PROTECTION MODAL (PHASE 5) -->
+  <div id="modal-active-step-protection" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">Cannot Delete Active Step</h3>
+      <p id="active-step-protection-msg" class="text-slate-600 text-sm mb-6">Cannot delete step because a learner is currently working on it.</p>
+      <button onclick="document.getElementById('modal-active-step-protection').classList.add('hidden')" class="w-full h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP FORM MODAL (PHASE 5) -->
+  <div id="modal-step-form" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-xl w-full shadow-2xl">
+      <h3 class="text-xl font-bold text-[#16202E] mb-4" id="step-modal-title">ADD STEP</h3>
+      <div class="flex flex-col gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Instruction *</label>
+          <textarea id="step-modal-instruction" rows="3" placeholder="e.g. Place items securely inside carton box" class="w-full p-3 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none"></textarea>
+          <span id="step-instruction-error" class="text-xs font-semibold text-red-600 mt-1 hidden">Instruction cannot be empty.</span>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Step Photograph</label>
+          <div class="flex items-center gap-4">
+            <div id="step-modal-photo-preview" class="w-28 h-20 bg-slate-100 border-2 border-slate-300 rounded-xl flex items-center justify-center text-xs text-slate-400 font-semibold overflow-hidden">
+              No Photo
+            </div>
+            <div class="flex flex-col gap-2">
+              <button onclick="simulatePhotoPick()" class="px-4 h-10 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-teal-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                CHOOSE PHOTO
+              </button>
+              <button id="btn-remove-step-photo" onclick="removeStepPhoto()" class="hidden px-4 h-9 border border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs rounded-xl">
+                REMOVE PHOTO
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button onclick="closeStepFormModal()" class="h-11 px-5 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50">CANCEL</button>
+        <button onclick="saveStepModal()" class="h-11 px-6 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md">SAVE STEP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST ITEM FORM MODAL (PHASE 5) -->
+  <div id="modal-checklist-form" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+      <h3 class="text-xl font-bold text-[#16202E] mb-4" id="checklist-modal-title">ADD CHECKLIST ITEM</h3>
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">Verification Prompt *</label>
+        <input id="checklist-modal-text" type="text" placeholder="e.g. Correct address label attached" class="w-full h-11 px-3.5 rounded-xl border-2 border-slate-300 text-sm focus:border-teal-600 focus:outline-none">
+        <span id="checklist-text-error" class="text-xs font-semibold text-red-600 mt-1 hidden">Item text cannot be empty.</span>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button onclick="closeChecklistFormModal()" class="h-11 px-5 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50">CANCEL</button>
+        <button onclick="saveChecklistModal()" class="h-11 px-6 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md">SAVE ITEM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNSAVED CHANGES MODAL -->
+  <div id="modal-unsaved-changes" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">UNSAVED CHANGES</h3>
+      <p class="text-slate-600 text-sm mb-6">Discard your changes?</p>
+      <div class="flex gap-3">
+        <button onclick="closeUnsavedChangesModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button onclick="confirmDiscardChanges()" class="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all">
+          DISCARD
+        </button>
+      </div>
+  <!-- SCHEDULE ADD TASK MODAL (PHASE 6) -->
+  <div id="modal-schedule-add" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+      <h3 class="text-xl font-bold text-[#16202E] mb-2">ADD TASK TO SCHEDULE</h3>
+      <p class="text-xs text-slate-500 mb-5">Select a task template to append to this day's routine.</p>
+      
+      <div id="schedule-add-options" class="flex flex-col gap-2 max-h-60 overflow-y-auto mb-6">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="closeScheduleAddModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button id="btn-confirm-add-schedule" onclick="confirmScheduleAddTask()" class="flex-1 h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all">
+          ADD TO DAY
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE REMOVE TASK CONFIRMATION (PHASE 6) -->
+  <div id="modal-schedule-remove" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-2">REMOVE FROM SCHEDULE?</h3>
+      <p id="schedule-remove-task-title" class="text-base font-bold text-slate-800 mb-2">Task Title</p>
+      <p class="text-slate-500 text-xs mb-6">This removes the task from this date's routine. The task template and learner history will NOT be deleted.</p>
+      <div class="flex gap-3">
+        <button onclick="closeScheduleRemoveModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button onclick="confirmScheduleRemoveTask()" class="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all">
+          REMOVE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATE PICKER MODAL (PHASE 6) -->
+  <div id="modal-date-picker" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+      <h3 class="text-xl font-bold text-[#16202E] mb-2">SELECT DATE</h3>
+      <p class="text-xs text-slate-500 mb-4">Jump to any workplace schedule</p>
+      <input type="date" id="date-picker-input" class="w-full h-12 px-4 rounded-xl border-2 border-slate-300 font-bold text-slate-800 mb-6 focus:border-teal-600 focus:outline-none">
+      <div class="flex gap-3">
+        <button onclick="closeDatePickerModal()" class="flex-1 h-12 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+          CANCEL
+        </button>
+        <button onclick="confirmDatePicker()" class="flex-1 h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold rounded-xl shadow-md transition-all">
+          SELECT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DATA
+    let taskStepsMap = {
+      "pack_one_parcel": [
+        { id: "s1", stepNumber: 1, instruction: "Take the assigned item, box and packing materials.", photo: null },
+        { id: "s2", stepNumber: 2, instruction: "Check the item and quantity against the packing instruction.", photo: null },
+        { id: "s3", stepNumber: 3, instruction: "Place the item in the box. Add the required protective material.", photo: null },
+        { id: "s4", stepNumber: 4, instruction: "Close and seal the box.", photo: null },
+        { id: "s5", stepNumber: 5, instruction: "Attach the supplied parcel label in the correct position.", photo: null }
+      ],
+      "clean_work_area": [
+        { id: "ca1", stepNumber: 1, instruction: "Put away loose packaging materials.", photo: null },
+        { id: "ca2", stepNumber: 2, instruction: "Wipe down workbench surface.", photo: null }
+      ],
+      "sort_supplies": [
+        { id: "ss1", stepNumber: 1, instruction: "Count incoming supply boxes.", photo: null }
+      ]
+    };
+
+    let taskChecklistMap = {
+      "pack_one_parcel": [
+        { id: 1, order: 1, text: "Correct item and quantity", checked: false },
+        { id: 2, order: 2, text: "Item is protected", checked: false },
+        { id: 3, order: 3, text: "Box is sealed", checked: false },
+        { id: 4, order: 4, text: "Correct label is attached", checked: false }
+      ],
+      "clean_work_area": [],
+      "sort_supplies": []
+    };
+
+    let tasksList = [
+      { id: "clean_work_area", title: "Clean work area", description: "End of shift workstation clean.", helpPhrase: "Please ask a member of staff for help.", completionPhrase: "I have cleaned my work area." },
+      { id: "pack_one_parcel", title: "Pack one parcel", description: "Collect item and packing materials at workstation.", helpPhrase: "Please ask a member of staff for help with this step.", completionPhrase: "I have finished packing this parcel. Please check." },
+      { id: "sort_supplies", title: "Sort supplies", description: "Upcoming workstation task.", helpPhrase: "Please ask a member of staff for help.", completionPhrase: "I have finished sorting supplies." }
+    ];
+
+    let currentScreen = "TODAY";
+    let currentStepIndex = 0; // Learner's active step index (0-based) for "pack_one_parcel"
+    let learnerTaskActive = true; // "pack_one_parcel" is IN_PROGRESS
+    let appMode = "LEARNER";
+    let currentPin = "";
+    const DEV_PIN = "1234";
+
+    let activeManageTaskId = "pack_one_parcel";
+    let editingStepIndex = null;
+    let editingStepPhoto = null;
+    let editingChecklistIndex = null;
+    let isFormDirty = false;
+    let editingTaskId = null;
+
+    function switchMode(newMode) {
+      appMode = newMode;
+      document.getElementById("mode-learner").classList.add("hidden");
+      document.getElementById("mode-pin").classList.add("hidden");
+      document.getElementById("mode-dashboard").classList.add("hidden");
+      document.getElementById("mode-templates").classList.add("hidden");
+      document.getElementById("mode-task-form").classList.add("hidden");
+      document.getElementById("mode-manage-steps").classList.add("hidden");
+      document.getElementById("mode-manage-checklist").classList.add("hidden");
+      document.getElementById("mode-schedule-management").classList.add("hidden");
+
+      if (newMode === "LEARNER") {
+        document.getElementById("mode-learner").classList.remove("hidden");
+        updateLearnerDynamicSchedule();
+        updateHowScreen();
+        renderChecklist();
+      } else if (newMode === "STAFF_PIN") {
+        currentPin = "";
+        updatePinDots();
+        clearPinError();
+        document.getElementById("mode-pin").classList.remove("hidden");
+      } else if (newMode === "STAFF_DASHBOARD") {
+        document.getElementById("mode-dashboard").classList.remove("hidden");
+      } else if (newMode === "TASK_TEMPLATES") {
+        renderTaskTemplatesList();
+        document.getElementById("mode-templates").classList.remove("hidden");
+      } else if (newMode === "TASK_FORM") {
+        document.getElementById("mode-task-form").classList.remove("hidden");
+      } else if (newMode === "MANAGE_STEPS") {
+        renderStepsList();
+        document.getElementById("mode-manage-steps").classList.remove("hidden");
+      } else if (newMode === "MANAGE_CHECKLIST") {
+        renderManageChecklistList();
+        document.getElementById("mode-manage-checklist").classList.remove("hidden");
+      } else if (newMode === "SCHEDULE_MANAGEMENT") {
+        renderScheduleList();
+        document.getElementById("mode-schedule-management").classList.remove("hidden");
+      }
+    }
+
+    // TASK TEMPLATES CRUD
+    function renderTaskTemplatesList() {
+      tasksList.sort((a, b) => a.title.localeCompare(b.title));
+      const container = document.getElementById("task-list-container");
+      container.innerHTML = "";
+
+      tasksList.forEach(t => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl p-5 border-2 border-slate-200 shadow-sm flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex-1 pr-4">
+            <h3 class="text-lg font-bold text-slate-900">${t.title}</h3>
+            <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">${t.description || "No description"}</p>
+            <div class="flex gap-4 mt-2 text-[11px] text-slate-400">
+              <span>Help: "${(t.helpPhrase || "").slice(0, 25)}..."</span>
+              <span>Done: "${(t.completionPhrase || "").slice(0, 25)}..."</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openManageSteps('${t.id}')" class="px-3.5 h-10 border-2 border-teal-600 text-teal-700 hover:bg-teal-50 font-bold text-xs rounded-xl transition-all">STEPS</button>
+            <button onclick="openManageChecklist('${t.id}')" class="px-3.5 h-10 border-2 border-teal-600 text-teal-700 hover:bg-teal-50 font-bold text-xs rounded-xl transition-all">CHECKLIST</button>
+            <button onclick="openEditTaskForm('${t.id}')" class="px-3.5 h-10 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-all">EDIT</button>
+            <button onclick="copyTaskItem('${t.id}')" class="px-3.5 h-10 border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-all">COPY</button>
+            <button onclick="requestDeleteTaskItem('${t.id}')" class="px-3.5 h-10 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl border border-red-200 transition-all">DELETE</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openManageSteps(taskId) {
+      activeManageTaskId = taskId;
+      const t = tasksList.find(x => x.id === taskId);
+      document.getElementById("steps-screen-subtitle").innerText = t ? t.title : "";
+      switchMode("MANAGE_STEPS");
+    }
+
+    function openManageChecklist(taskId) {
+      activeManageTaskId = taskId;
+      const t = tasksList.find(x => x.id === taskId);
+      document.getElementById("checklist-screen-subtitle").innerText = t ? t.title : "";
+      switchMode("MANAGE_CHECKLIST");
+    }
+
+    // STEPS MANAGEMENT
+    function renderStepsList() {
+      const list = taskStepsMap[activeManageTaskId] || [];
+      const container = document.getElementById("steps-list-container");
+      container.innerHTML = "";
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-10 text-center border-2 border-slate-200">
+            <h3 class="text-xl font-bold text-slate-800 mb-1">NO STEPS DEFINED</h3>
+            <p class="text-slate-500 text-xs mb-4">Add your first instruction step.</p>
+            <button onclick="openAddStepModal()" class="px-5 h-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-xs rounded-xl">ADD STEP</button>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach((step, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl p-4 border-2 border-slate-200 shadow-sm flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex items-center gap-4 flex-1">
+            <span class="bg-slate-100 text-slate-800 font-bold text-xs px-3 py-2 rounded-lg">STEP ${step.stepNumber}</span>
+            <div class="w-16 h-12 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-[10px] text-slate-400 font-semibold overflow-hidden">
+              ${step.photo ? `<img src="${step.photo}" class="w-full h-full object-cover">` : `No photo`}
+            </div>
+            <p class="text-sm font-semibold text-slate-800 flex-1">${step.instruction}</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="moveStep(${idx}, -1)" ${idx === 0 ? "disabled" : ""} class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">▲</button>
+            <button onclick="moveStep(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""} class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">▼</button>
+            <button onclick="openEditStepModal(${idx})" class="px-3 h-9 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg">EDIT</button>
+            <button onclick="deleteStepItem(${idx})" class="px-3 h-9 border border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs rounded-lg">DELETE</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function moveStep(index, dir) {
+      const list = taskStepsMap[activeManageTaskId];
+      const targetIdx = index + dir;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+      const temp = list[index];
+      list[index] = list[targetIdx];
+      list[targetIdx] = temp;
+      list.forEach((s, i) => s.stepNumber = i + 1);
+      renderStepsList();
+      updateHowScreen();
+    }
+
+    function deleteStepItem(index) {
+      const list = taskStepsMap[activeManageTaskId];
+      const stepToDelete = list[index];
+
+      // Active Learner Protection Check
+      if (activeManageTaskId === "pack_one_parcel" && learnerTaskActive) {
+        const learnerStepNumber = currentStepIndex + 1;
+        if (stepToDelete.stepNumber === learnerStepNumber) {
+          // Case 1: Cannot delete active step!
+          document.getElementById("active-step-protection-msg").innerText = 
+            `Cannot delete Step ${stepToDelete.stepNumber} because the learner is currently working on this step at the workstation.`;
+          document.getElementById("modal-active-step-protection").classList.remove("hidden");
+          return;
+        } else if (stepToDelete.stepNumber < learnerStepNumber) {
+          // Case 2: Preceding step deleted -> decrement currentStepIndex
+          currentStepIndex = Math.max(0, currentStepIndex - 1);
+        } else {
+          // Case 3: Succeeding step deleted -> leave currentStepIndex unchanged
+        }
+      }
+
+      list.splice(index, 1);
+      list.forEach((s, i) => s.stepNumber = i + 1);
+      renderStepsList();
+      updateHowScreen();
+    }
+
+    function openAddStepModal() {
+      editingStepIndex = null;
+      editingStepPhoto = null;
+      document.getElementById("step-modal-title").innerText = "ADD STEP " + ((taskStepsMap[activeManageTaskId] || []).length + 1);
+      document.getElementById("step-modal-instruction").value = "";
+      document.getElementById("step-instruction-error").classList.add("hidden");
+      updateStepModalPhotoPreview();
+      document.getElementById("modal-step-form").classList.remove("hidden");
+    }
+
+    function openEditStepModal(idx) {
+      editingStepIndex = idx;
+      const step = taskStepsMap[activeManageTaskId][idx];
+      editingStepPhoto = step.photo;
+      document.getElementById("step-modal-title").innerText = "EDIT STEP " + step.stepNumber;
+      document.getElementById("step-modal-instruction").value = step.instruction;
+      document.getElementById("step-instruction-error").classList.add("hidden");
+      updateStepModalPhotoPreview();
+      document.getElementById("modal-step-form").classList.remove("hidden");
+    }
+
+    function closeStepFormModal() {
+      document.getElementById("modal-step-form").classList.add("hidden");
+    }
+
+    function simulatePhotoPick() {
+      editingStepPhoto = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=300&q=80";
+      updateStepModalPhotoPreview();
+    }
+
+    function removeStepPhoto() {
+      editingStepPhoto = null;
+      updateStepModalPhotoPreview();
+    }
+
+    function updateStepModalPhotoPreview() {
+      const preview = document.getElementById("step-modal-photo-preview");
+      const removeBtn = document.getElementById("btn-remove-step-photo");
+      if (editingStepPhoto) {
+        preview.innerHTML = `<img src="${editingStepPhoto}" class="w-full h-full object-cover">`;
+        removeBtn.classList.remove("hidden");
+      } else {
+        preview.innerHTML = `No Photo`;
+        removeBtn.classList.add("hidden");
+      }
+    }
+
+    function saveStepModal() {
+      const text = document.getElementById("step-modal-instruction").value.trim();
+      if (!text) {
+        document.getElementById("step-instruction-error").classList.remove("hidden");
+        return;
+      }
+      if (!taskStepsMap[activeManageTaskId]) taskStepsMap[activeManageTaskId] = [];
+      const list = taskStepsMap[activeManageTaskId];
+
+      if (editingStepIndex !== null) {
+        list[editingStepIndex].instruction = text;
+        list[editingStepIndex].photo = editingStepPhoto;
+      } else {
+        list.push({
+          id: "step_" + Date.now(),
+          stepNumber: list.length + 1,
+          instruction: text,
+          photo: editingStepPhoto
+        });
+      }
+      closeStepFormModal();
+      renderStepsList();
+      updateHowScreen();
+    }
+
+    // CHECKLIST MANAGEMENT
+    function renderManageChecklistList() {
+      const list = taskChecklistMap[activeManageTaskId] || [];
+      const container = document.getElementById("manage-checklist-container");
+      container.innerHTML = "";
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-10 text-center border-2 border-slate-200">
+            <h3 class="text-xl font-bold text-slate-800 mb-1">NO CHECKLIST ITEMS</h3>
+            <p class="text-slate-500 text-xs mb-4">Tasks without verification checks allow learners to continue directly to Done.</p>
+            <button onclick="openAddChecklistModal()" class="px-5 h-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-xs rounded-xl">ADD ITEM</button>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl p-4 border-2 border-slate-200 shadow-sm flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex items-center gap-4 flex-1">
+            <span class="bg-slate-100 text-slate-800 font-bold text-xs px-3 py-2 rounded-lg">#${item.order}</span>
+            <p class="text-sm font-semibold text-slate-800 flex-1">${item.text}</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="moveChecklistItem(${idx}, -1)" ${idx === 0 ? "disabled" : ""} class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">▲</button>
+            <button onclick="moveChecklistItem(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""} class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">▼</button>
+            <button onclick="openEditChecklistModal(${idx})" class="px-3 h-9 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg">EDIT</button>
+            <button onclick="deleteChecklistItem(${idx})" class="px-3 h-9 border border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs rounded-lg">DELETE</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function moveChecklistItem(index, dir) {
+      const list = taskChecklistMap[activeManageTaskId];
+      const targetIdx = index + dir;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+      const temp = list[index];
+      list[index] = list[targetIdx];
+      list[targetIdx] = temp;
+      list.forEach((itm, i) => itm.order = i + 1);
+      renderManageChecklistList();
+      renderChecklist();
+    }
+
+    function deleteChecklistItem(index) {
+      const list = taskChecklistMap[activeManageTaskId];
+      list.splice(index, 1);
+      list.forEach((itm, i) => itm.order = i + 1);
+      renderManageChecklistList();
+      renderChecklist();
+    }
+
+    function openAddChecklistModal() {
+      editingChecklistIndex = null;
+      document.getElementById("checklist-modal-title").innerText = "ADD CHECKLIST ITEM";
+      document.getElementById("checklist-modal-text").value = "";
+      document.getElementById("checklist-text-error").classList.add("hidden");
+      document.getElementById("modal-checklist-form").classList.remove("hidden");
+    }
+
+    function openEditChecklistModal(idx) {
+      editingChecklistIndex = idx;
+      const item = taskChecklistMap[activeManageTaskId][idx];
+      document.getElementById("checklist-modal-title").innerText = "EDIT CHECKLIST ITEM #" + item.order;
+      document.getElementById("checklist-modal-text").value = item.text;
+      document.getElementById("checklist-text-error").classList.add("hidden");
+      document.getElementById("modal-checklist-form").classList.remove("hidden");
+    }
+
+    function closeChecklistFormModal() {
+      document.getElementById("modal-checklist-form").classList.add("hidden");
+    }
+
+    function saveChecklistModal() {
+      const text = document.getElementById("checklist-modal-text").value.trim();
+      if (!text) {
+        document.getElementById("checklist-text-error").classList.remove("hidden");
+        return;
+      }
+      if (!taskChecklistMap[activeManageTaskId]) taskChecklistMap[activeManageTaskId] = [];
+      const list = taskChecklistMap[activeManageTaskId];
+
+      if (editingChecklistIndex !== null) {
+        list[editingChecklistIndex].text = text;
+      } else {
+        list.push({
+          id: Date.now(),
+          order: list.length + 1,
+          text: text,
+          checked: false
+        });
+      }
+      closeChecklistFormModal();
+      renderManageChecklistList();
+      renderChecklist();
+    }
+
+    // DEEP COPY (PHASE 5)
+    function copyTaskItem(taskId) {
+      const orig = tasksList.find(t => t.id === taskId);
+      if (!orig) return;
+      const newId = "task_" + Date.now();
+      const copy = {
+        id: newId,
+        title: `${orig.title} — Copy`,
+        description: orig.description,
+        helpPhrase: orig.helpPhrase,
+        completionPhrase: orig.completionPhrase
+      };
+      tasksList.push(copy);
+
+      // Duplicate child steps
+      const origSteps = taskStepsMap[taskId] || [];
+      taskStepsMap[newId] = origSteps.map(s => ({
+        id: "step_" + Math.random().toString(36).substr(2, 9),
+        stepNumber: s.stepNumber,
+        instruction: s.instruction,
+        photo: s.photo
+      }));
+
+      // Duplicate child checklist
+      const origCheck = taskChecklistMap[taskId] || [];
+      taskChecklistMap[newId] = origCheck.map((c, i) => ({
+        id: Date.now() + i,
+        order: c.order,
+        text: c.text,
+        checked: false
+      }));
+
+      renderTaskTemplatesList();
+      showTemplatesBanner("Task duplicated with all steps and checklist items.");
+    }
+
+    function requestDeleteTaskItem(taskId) {
+      if (taskId === "pack_one_parcel" && learnerTaskActive) {
+        document.getElementById("modal-active-protection").classList.remove("hidden");
+        return;
+      }
+      taskPendingDeleteId = taskId;
+      const t = tasksList.find(x => x.id === taskId);
+      document.getElementById("delete-task-target-title").innerText = t ? t.title : "";
+      document.getElementById("modal-delete-task").classList.remove("hidden");
+    }
+
+    function closeDeleteTaskModal() {
+      document.getElementById("modal-delete-task").classList.add("hidden");
+      taskPendingDeleteId = null;
+    }
+
+    function confirmDeleteTask() {
+      if (taskPendingDeleteId) {
+        tasksList = tasksList.filter(t => t.id !== taskPendingDeleteId);
+        delete taskStepsMap[taskPendingDeleteId];
+        delete taskChecklistMap[taskPendingDeleteId];
+        closeDeleteTaskModal();
+        renderTaskTemplatesList();
+        showTemplatesBanner("Task deleted.");
+      }
+    }
+
+    function closeActiveProtectionModal() {
+      document.getElementById("modal-active-protection").classList.add("hidden");
+    }
+
+    function showTemplatesBanner(msg) {
+      document.getElementById("templates-banner-text").innerText = msg;
+      document.getElementById("templates-banner").classList.remove("hidden");
+    }
+
+    function openCreateTaskForm() {
+      editingTaskId = null;
+      isFormDirty = false;
+      document.getElementById("form-screen-title").innerText = "CREATE TASK";
+      document.getElementById("form-screen-subtitle").innerText = "Define a new workplace task template";
+      document.getElementById("form-task-title").value = "";
+      document.getElementById("form-task-desc").value = "";
+      document.getElementById("form-task-help").value = "I need help with this step. Please ask a member of staff.";
+      document.getElementById("form-task-done").value = "I have finished this task. Please check.";
+      document.getElementById("form-title-error").classList.add("hidden");
+      switchMode("TASK_FORM");
+    }
+
+    function openEditTaskForm(taskId) {
+      const task = tasksList.find(t => t.id === taskId);
+      if (!task) return;
+      editingTaskId = taskId;
+      isFormDirty = false;
+      document.getElementById("form-screen-title").innerText = "EDIT TASK";
+      document.getElementById("form-screen-subtitle").innerText = "Modify existing task template";
+      document.getElementById("form-task-title").value = task.title;
+      document.getElementById("form-task-desc").value = task.description;
+      document.getElementById("form-task-help").value = task.helpPhrase;
+      document.getElementById("form-task-done").value = task.completionPhrase;
+      document.getElementById("form-title-error").classList.add("hidden");
+      switchMode("TASK_FORM");
+    }
+
+    function markFormDirty() {
+      isFormDirty = true;
+      document.getElementById("form-title-error").classList.add("hidden");
+    }
+
+    function handleFormBack() {
+      if (isFormDirty) {
+        document.getElementById("modal-unsaved-changes").classList.remove("hidden");
+      } else {
+        switchMode("TASK_TEMPLATES");
+      }
+    }
+
+    function closeUnsavedChangesModal() {
+      document.getElementById("modal-unsaved-changes").classList.add("hidden");
+    }
+
+    function confirmDiscardChanges() {
+      closeUnsavedChangesModal();
+      isFormDirty = false;
+      switchMode("TASK_TEMPLATES");
+    }
+
+    function saveTaskForm() {
+      const title = document.getElementById("form-task-title").value.trim();
+      const desc = document.getElementById("form-task-desc").value.trim();
+      const help = document.getElementById("form-task-help").value.trim();
+      const done = document.getElementById("form-task-done").value.trim();
+
+      if (!title) {
+        document.getElementById("form-title-error").classList.remove("hidden");
+        return;
+      }
+
+      if (editingTaskId) {
+        const task = tasksList.find(t => t.id === editingTaskId);
+        if (task) {
+          task.title = title;
+          task.description = desc;
+          task.helpPhrase = help;
+          task.completionPhrase = done;
+          showTemplatesBanner("Task updated.");
+        }
+      } else {
+        const newId = "task_" + Date.now();
+        tasksList.push({
+          id: newId,
+          title: title,
+          description: desc,
+          helpPhrase: help,
+          completionPhrase: done
+        });
+        taskStepsMap[newId] = [];
+        taskChecklistMap[newId] = [];
+        showTemplatesBanner("Task created.");
+      }
+      isFormDirty = false;
+      switchMode("TASK_TEMPLATES");
+    }
+
+    // PIN LOGIC
+    function pressPin(digit) {
+      if (currentPin.length < 4) {
+        currentPin += digit;
+        updatePinDots();
+        clearPinError();
+        if (currentPin.length === 4) {
+          setTimeout(verifyPin, 150);
+        }
+      }
+    }
+
+    function clearPin() {
+      currentPin = "";
+      updatePinDots();
+      clearPinError();
+    }
+
+    function backspacePin() {
+      if (currentPin.length > 0) {
+        currentPin = currentPin.slice(0, -1);
+        updatePinDots();
+        clearPinError();
+      }
+    }
+
+    function updatePinDots() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById("dot-" + i);
+        if (i < currentPin.length) {
+          dot.classList.add("bg-teal-400", "border-teal-400");
+          dot.classList.remove("bg-transparent", "border-slate-500");
+        } else {
+          dot.classList.remove("bg-teal-400", "border-teal-400");
+          dot.classList.add("bg-transparent", "border-slate-500");
+        }
+      }
+    }
+
+    function verifyPin() {
+      if (currentPin === DEV_PIN) {
+        switchMode("STAFF_DASHBOARD");
+      } else {
+        document.getElementById("pin-error").classList.remove("hidden");
+        clearPin();
+      }
+    }
+
+    function clearPinError() {
+      document.getElementById("pin-error").classList.add("hidden");
+    }
+
+    function openExitStaffModal() {
+      document.getElementById("modal-exit-staff").classList.remove("hidden");
+    }
+
+    function closeExitStaffModal() {
+      document.getElementById("modal-exit-staff").classList.add("hidden");
+    }
+
+    function confirmExitStaff() {
+      closeExitStaffModal();
+      switchMode("LEARNER");
+    }
+
+    // LEARNER MODE DYNAMIC INTEGRATION
+    function updateHowScreen() {
+      const activeSteps = taskStepsMap["pack_one_parcel"] || [];
+      if (activeSteps.length === 0) {
+        navigateTo("CHECK");
+        return;
+      }
+      if (currentStepIndex >= activeSteps.length) {
+        currentStepIndex = activeSteps.length - 1;
+      }
+      const step = activeSteps[currentStepIndex];
+      document.getElementById("how-step-counter").innerText = `Step ${currentStepIndex + 1} of ${activeSteps.length}`;
+      document.getElementById("how-instruction").innerText = step.instruction;
+      
+      const photoContent = document.getElementById("how-photo-content");
+      if (step.photo) {
+        photoContent.innerHTML = `<img src="${step.photo}" class="max-h-[220px] rounded-xl object-contain">`;
+      } else {
+        photoContent.innerHTML = `
+          <div class="bg-slate-100 text-slate-800 px-4 py-2 rounded-xl flex items-center gap-2 mb-3">
+            <svg class="w-6 h-6 text-[#006B75]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span class="font-bold text-sm tracking-wider">STEP ${step.stepNumber} PHOTO</span>
+          </div>
+          <p class="text-slate-600 text-base font-medium max-w-lg whitespace-pre-line leading-relaxed">
+            Step ${step.stepNumber} Photo Placeholder:\n${step.instruction}
+          </p>
+        `;
+      }
+
+      document.getElementById("btn-prev-step").disabled = (currentStepIndex === 0);
+      if (currentStepIndex === 0) {
+        document.getElementById("btn-prev-step").classList.add("text-slate-400", "cursor-not-allowed");
+        document.getElementById("btn-prev-step").classList.remove("text-slate-700", "hover:bg-slate-100");
+      } else {
+        document.getElementById("btn-prev-step").classList.remove("text-slate-400", "cursor-not-allowed");
+        document.getElementById("btn-prev-step").classList.add("text-slate-700", "hover:bg-slate-100");
+      }
+    }
+
+    function renderChecklist() {
+      const activeChecklist = taskChecklistMap["pack_one_parcel"] || [];
+      const container = document.getElementById("checklist-container");
+      container.innerHTML = "";
+
+      if (activeChecklist.length === 0) {
+        container.innerHTML = `<p class="text-slate-500 italic py-4">No inspection items required for this task. Tap continue to finish.</p>`;
+        document.getElementById("btn-continue-check").disabled = false;
+        document.getElementById("btn-continue-check").classList.remove("bg-slate-200", "text-slate-400", "cursor-not-allowed");
+        document.getElementById("btn-continue-check").classList.add("bg-[#006B75]", "text-white", "hover:bg-[#005961]", "shadow-md");
+        return;
+      }
+
+      activeChecklist.forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
+          item.checked ? "bg-teal-50 border-teal-500 shadow-sm" : "bg-white border-slate-200 hover:border-slate-300"
+        }`;
+        card.onclick = () => toggleCheckItem(idx);
+        card.innerHTML = `
+          <span class="text-lg font-bold ${item.checked ? "text-teal-900" : "text-slate-800"}">${item.text}</span>
+          <div class="w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all ${
+            item.checked ? "bg-teal-600 border-teal-600 text-white" : "border-slate-300 bg-white"
+          }">
+            ${item.checked ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>' : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      const allChecked = activeChecklist.every(i => i.checked);
+      const btn = document.getElementById("btn-continue-check");
+      btn.disabled = !allChecked;
+      if (allChecked) {
+        btn.classList.remove("bg-slate-200", "text-slate-400", "cursor-not-allowed");
+        btn.classList.add("bg-[#006B75]", "text-white", "hover:bg-[#005961]", "shadow-md");
+      } else {
+        btn.classList.add("bg-slate-200", "text-slate-400", "cursor-not-allowed");
+        btn.classList.remove("bg-[#006B75]", "text-white", "hover:bg-[#005961]", "shadow-md");
+      }
+    }
+
+    function toggleCheckItem(idx) {
+      const activeChecklist = taskChecklistMap["pack_one_parcel"] || [];
+      activeChecklist[idx].checked = !activeChecklist[idx].checked;
+      renderChecklist();
+    }
+
+    function navigateTo(screen) {
+      currentScreen = screen;
+      document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
+      const target = document.getElementById("screen-" + screen);
+      if (target) target.classList.remove("hidden");
+      updateRail();
+
+      if (screen === "HOW") {
+        updateHowScreen();
+      } else if (screen === "CHECK") {
+        renderChecklist();
+      }
+    }
+
+    function updateRail() {
+      const screens = ["TODAY", "NOW", "HOW", "CHECK", "DONE", "NEXT"];
+      screens.forEach(s => {
+        const btn = document.getElementById("rail-" + s);
+        if (!btn) return;
+        if (s === currentScreen) {
+          btn.className = "rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all bg-[#0D7A75] text-white";
+        } else {
+          btn.className = "rail-btn w-full h-[68px] rounded-xl flex flex-col items-center justify-center transition-all text-slate-400 hover:text-slate-200";
+        }
+      });
+    }
+
+    function startTask() {
+      currentStepIndex = 0;
+      const list = taskChecklistMap["pack_one_parcel"] || [];
+      list.forEach(i => i.checked = false);
+      navigateTo("HOW");
+    }
+
+    function nextStep() {
+      const activeSteps = taskStepsMap["pack_one_parcel"] || [];
+      if (currentStepIndex < activeSteps.length - 1) {
+        currentStepIndex++;
+        updateHowScreen();
+      } else {
+        navigateTo("CHECK");
+      }
+    }
+
+    function previousStep() {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        updateHowScreen();
+      }
+    }
+
+    function continueFromCheck() {
+      const list = taskChecklistMap["pack_one_parcel"] || [];
+      if (list.length === 0 || list.every(i => i.checked)) {
+        navigateTo("DONE");
+      }
+    }
+
+    function completeTask() {
+      navigateTo("NEXT");
+    }
+
+    function openHelpModal() {
+      document.getElementById("modal-help").classList.remove("hidden");
+    }
+    function closeHelpModal() {
+      document.getElementById("modal-help").classList.add("hidden");
+    }
+
+    function openNextTaskModal() {
+      document.getElementById("modal-next-task").classList.remove("hidden");
+    }
+    function closeNextTaskModal() {
+      document.getElementById("modal-next-task").classList.add("hidden");
+    }
+
+    // ==========================================
+    // PHASE 6: DAILY SCHEDULES STATE & LOGIC
+    // ==========================================
+    function getTodayIso() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    const todayIso = getTodayIso();
+    let selectedScheduleDate = todayIso;
+    let dailySchedules = {};
+    dailySchedules[todayIso] = ["pack_one_parcel", "sort_supplies", "clean_work_area"];
+    let taskProgressMap = {
+      "pack_one_parcel": { status: "IN_PROGRESS", currentStep: 1 },
+      "sort_supplies": { status: "NOT_STARTED", currentStep: 1 },
+      "clean_work_area": { status: "NOT_STARTED", currentStep: 1 }
+    };
+    let scheduleRemoveTargetId = null;
+    let selectedTaskIdToAddSchedule = null;
+
+    function formatDisplayDate(isoStr) {
+      const parts = isoStr.split("-");
+      const d = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    }
+
+    function updateScheduleDateBar() {
+      document.getElementById("schedule-date-display").innerText = formatDisplayDate(selectedScheduleDate);
+      const todayBtn = document.getElementById("schedule-btn-today");
+      if (selectedScheduleDate === todayIso) {
+        todayBtn.className = "h-10 px-5 rounded-xl font-bold text-xs bg-teal-600 text-white shadow-sm hover:bg-teal-700 transition-all";
+      } else {
+        todayBtn.className = "h-10 px-5 rounded-xl font-bold text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all border border-slate-300";
+      }
+    }
+
+    function schedulePrevDay() {
+      const parts = selectedScheduleDate.split("-");
+      const d = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      d.setDate(d.getDate() - 1);
+      selectedScheduleDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      renderScheduleList();
+    }
+
+    function scheduleNextDay() {
+      const parts = selectedScheduleDate.split("-");
+      const d = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      d.setDate(d.getDate() + 1);
+      selectedScheduleDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      renderScheduleList();
+    }
+
+    function scheduleGoToday() {
+      selectedScheduleDate = todayIso;
+      renderScheduleList();
+    }
+
+    function openDatePickerModal() {
+      document.getElementById("date-picker-input").value = selectedScheduleDate;
+      document.getElementById("modal-date-picker").classList.remove("hidden");
+    }
+
+    function closeDatePickerModal() {
+      document.getElementById("modal-date-picker").classList.add("hidden");
+    }
+
+    function confirmDatePicker() {
+      const val = document.getElementById("date-picker-input").value;
+      if (val) {
+        selectedScheduleDate = val;
+        closeDatePickerModal();
+        renderScheduleList();
+      }
+    }
+
+    function renderScheduleList() {
+      updateScheduleDateBar();
+      if (!dailySchedules[selectedScheduleDate]) {
+        dailySchedules[selectedScheduleDate] = [];
+      }
+      const list = dailySchedules[selectedScheduleDate];
+      const container = document.getElementById("schedule-list-container");
+      container.innerHTML = "";
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-12 text-center border-2 border-slate-200 shadow-sm">
+            <div class="w-14 h-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">NO TASKS SCHEDULED</h3>
+            <p class="text-slate-500 text-xs mb-5">No tasks are scheduled for this day. Tap below to assign workplace tasks.</p>
+            <button onclick="openScheduleAddModal()" class="px-5 h-11 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-xs rounded-xl shadow-sm transition-all">
+              ADD TASK TO THIS DAY
+            </button>
+          </div>
+        `;
+        updateLearnerDynamicSchedule();
+        return;
+      }
+
+      list.forEach((taskId, idx) => {
+        const t = tasksList.find(x => x.id === taskId) || { title: taskId, description: "" };
+        const order = idx + 1;
+        const category = order === 1 ? "NOW" : order === 2 ? "NEXT" : "LATER";
+        const catClass = category === "NOW" ? "bg-teal-50 text-teal-800 border-teal-300" :
+                         category === "NEXT" ? "bg-sky-50 text-sky-800 border-sky-300" :
+                         "bg-slate-50 text-slate-700 border-slate-300";
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl p-4 border-2 border-slate-200 shadow-sm flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex items-center gap-4 flex-1">
+            <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 font-bold text-sm flex items-center justify-center">${order}</span>
+            <span class="px-2.5 py-1 rounded-lg border text-xs font-extrabold tracking-wider ${catClass}">${category}</span>
+            <div class="flex-1">
+              <h4 class="text-base font-bold text-slate-900">${t.title}</h4>
+              <p class="text-xs text-slate-500 line-clamp-1">${t.description || "No description"}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="moveScheduleTask(${idx}, -1)" ${idx === 0 ? "disabled" : ""} class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+            </button>
+            <button onclick="moveScheduleTask(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""} class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+            </button>
+            <button onclick="openScheduleRemoveModal('${taskId}')" class="w-10 h-10 flex items-center justify-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateLearnerDynamicSchedule();
+    }
+
+    function moveScheduleTask(index, dir) {
+      const list = dailySchedules[selectedScheduleDate];
+      const target = index + dir;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[index];
+      list[index] = list[target];
+      list[target] = tmp;
+      renderScheduleList();
+    }
+
+    function openScheduleRemoveModal(taskId) {
+      scheduleRemoveTargetId = taskId;
+      const t = tasksList.find(x => x.id === taskId);
+      document.getElementById("schedule-remove-task-title").innerText = t ? t.title : taskId;
+      document.getElementById("modal-schedule-remove").classList.remove("hidden");
+    }
+
+    function closeScheduleRemoveModal() {
+      document.getElementById("modal-schedule-remove").classList.add("hidden");
+    }
+
+    function confirmScheduleRemoveTask() {
+      if (!scheduleRemoveTargetId) return;
+      const list = dailySchedules[selectedScheduleDate] || [];
+      const idx = list.indexOf(scheduleRemoveTargetId);
+      if (idx !== -1) {
+        list.splice(idx, 1);
+      }
+      closeScheduleRemoveModal();
+      renderScheduleList();
+    }
+
+    function openScheduleAddModal() {
+      selectedTaskIdToAddSchedule = null;
+      const currentScheduled = dailySchedules[selectedScheduleDate] || [];
+      const available = tasksList.filter(t => !currentScheduled.includes(t.id));
+      const container = document.getElementById("schedule-add-options");
+      container.innerHTML = "";
+
+      if (available.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">All workplace task templates are already scheduled for this day.</p>`;
+        document.getElementById("btn-confirm-add-schedule").disabled = true;
+        document.getElementById("btn-confirm-add-schedule").classList.add("opacity-50", "cursor-not-allowed");
+      } else {
+        selectedTaskIdToAddSchedule = available[0].id;
+        document.getElementById("btn-confirm-add-schedule").disabled = false;
+        document.getElementById("btn-confirm-add-schedule").classList.remove("opacity-50", "cursor-not-allowed");
+
+        available.forEach(t => {
+          const item = document.createElement("div");
+          item.id = "sched-opt-" + t.id;
+          item.onclick = () => selectScheduleTaskToAdd(t.id);
+          const isSelected = t.id === selectedTaskIdToAddSchedule;
+          item.className = "p-3 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all " +
+            (isSelected ? "border-teal-600 bg-teal-50" : "border-slate-200 bg-white hover:border-slate-300");
+          item.innerHTML = `
+            <div>
+              <h5 class="text-sm font-bold text-slate-900">${t.title}</h5>
+              <p class="text-xs text-slate-500 line-clamp-1">${t.description || ""}</p>
+            </div>
+            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-300'}">
+              ${isSelected ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : ''}
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      document.getElementById("modal-schedule-add").classList.remove("hidden");
+    }
+
+    function selectScheduleTaskToAdd(taskId) {
+      selectedTaskIdToAddSchedule = taskId;
+      const currentScheduled = dailySchedules[selectedScheduleDate] || [];
+      const available = tasksList.filter(t => !currentScheduled.includes(t.id));
+      available.forEach(t => {
+        const el = document.getElementById("sched-opt-" + t.id);
+        if (!el) return;
+        const isSelected = t.id === taskId;
+        el.className = "p-3 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all " +
+          (isSelected ? "border-teal-600 bg-teal-50" : "border-slate-200 bg-white hover:border-slate-300");
+        el.querySelector("div:last-child").className = "w-5 h-5 rounded-full border-2 flex items-center justify-center " +
+          (isSelected ? "border-teal-600 bg-teal-600 text-white" : "border-slate-300");
+        el.querySelector("div:last-child").innerHTML = isSelected ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : '';
+      });
+    }
+
+    function closeScheduleAddModal() {
+      document.getElementById("modal-schedule-add").classList.add("hidden");
+    }
+
+    function confirmScheduleAddTask() {
+      if (!selectedTaskIdToAddSchedule) return;
+      if (!dailySchedules[selectedScheduleDate]) {
+        dailySchedules[selectedScheduleDate] = [];
+      }
+      dailySchedules[selectedScheduleDate].push(selectedTaskIdToAddSchedule);
+      closeScheduleAddModal();
+      renderScheduleList();
+    }
+
+    // LEARNER DYNAMIC TODAY SCHEDULE CONSUMPTION
+    function updateLearnerDynamicSchedule() {
+      const todayList = dailySchedules[todayIso] || [];
+      const grid = document.getElementById("today-cards-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      if (todayList.length === 0) {
+        grid.innerHTML = `
+          <div class="bg-white rounded-2xl p-10 border-2 border-slate-200 text-center col-span-3">
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">NO TASKS ASSIGNED</h3>
+            <p class="text-slate-500 text-sm">There are no tasks scheduled for today. Please wait for staff instructions.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Check for active IN_PROGRESS task
+      let activeTaskId = todayList.find(id => {
+        const p = taskProgressMap[id];
+        return p && (p.status === "IN_PROGRESS" || p.status === "CHECKING");
+      });
+      if (!activeTaskId) {
+        activeTaskId = todayList.find(id => {
+          const p = taskProgressMap[id];
+          return !p || p.status !== "COMPLETED";
+        });
+      }
+
+      if (!activeTaskId) {
+        // All tasks completed
+        grid.innerHTML = `
+          <div class="bg-emerald-50 rounded-2xl p-10 border-2 border-emerald-300 text-center col-span-3">
+            <div class="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-emerald-950 mb-2">ALL TODAY'S TASKS COMPLETE</h3>
+            <p class="text-emerald-700 text-sm">Great job! You have completed all scheduled tasks for today.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const otherUncompleted = todayList.filter(id => id !== activeTaskId && (!taskProgressMap[id] || taskProgressMap[id].status !== "COMPLETED"));
+      const nextTaskId = otherUncompleted[0];
+      const laterTaskIds = otherUncompleted.slice(1);
+
+      // NOW CARD
+      const nowTask = tasksList.find(x => x.id === activeTaskId) || { title: activeTaskId, description: "" };
+      const nowCard = document.createElement("div");
+      nowCard.className = "bg-white rounded-2xl p-6 border-2 border-teal-500 shadow-md relative overflow-hidden";
+      nowCard.innerHTML = `
+        <div class="absolute top-0 right-0 bg-teal-600 text-white font-bold text-[11px] px-3 py-1 rounded-bl-xl tracking-wider">CURRENT</div>
+        <span class="text-xs font-extrabold tracking-widest text-[#006B75] mb-2 block">NOW</span>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">${nowTask.title}</h3>
+        <p class="text-slate-500 text-xs leading-relaxed">${nowTask.description || "Workplace workstation routine."}</p>
+      `;
+      grid.appendChild(nowCard);
+
+      // NEXT CARD
+      if (nextTaskId) {
+        const nextTask = tasksList.find(x => x.id === nextTaskId) || { title: nextTaskId, description: "" };
+        const nextCard = document.createElement("div");
+        nextCard.className = "bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm opacity-90";
+        nextCard.innerHTML = `
+          <span class="text-xs font-extrabold tracking-widest text-slate-400 mb-2 block">NEXT</span>
+          <h3 class="text-xl font-bold text-slate-700 mb-2">${nextTask.title}</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">${nextTask.description || "Upcoming task."}</p>
+        `;
+        grid.appendChild(nextCard);
+      }
+
+      // LATER CARD
+      if (laterTaskIds.length > 0) {
+        const laterTask = tasksList.find(x => x.id === laterTaskIds[0]) || { title: laterTaskIds[0], description: "" };
+        const laterCard = document.createElement("div");
+        laterCard.className = "bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm opacity-80";
+        laterCard.innerHTML = `
+          <span class="text-xs font-extrabold tracking-widest text-slate-400 mb-2 block">LATER</span>
+          <h3 class="text-xl font-bold text-slate-600 mb-2">${laterTask.title}</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">${laterTask.description || "Later task."}</p>
+        `;
+        grid.appendChild(laterCard);
+      }
+    }
+
+    // Initialize
+    renderChecklist();
+    updateLearnerDynamicSchedule();
+    navigateTo("TODAY");
+  </script>
+</body>
+</html>
