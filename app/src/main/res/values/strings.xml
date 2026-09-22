@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Learner Workstation</string>
+    <string name="task_title_sample">Pack one parcel</string>
+    <string name="staff_button_label">STAFF</string>
+</resources>
