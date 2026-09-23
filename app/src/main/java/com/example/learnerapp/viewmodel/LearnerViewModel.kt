@@ -375,8 +375,15 @@ class LearnerViewModel(
      * Completes the current task and advances to the NEXT screen.
      * Persists status = COMPLETED and completedAt timestamp in Room.
      */
+    private var lastCompletedTaskId: String? = null
+
+    /**
+     * Completes the current task and advances to the NEXT screen.
+     * Persists status = COMPLETED and completedAt timestamp in Room.
+     */
     fun completeTask() {
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
+        lastCompletedTaskId = taskId
         activeRepository?.let { repo ->
             mutationJob = viewModelScope.launch {
                 repo.completeTask(taskId)
@@ -388,13 +395,27 @@ class LearnerViewModel(
     }
 
     /**
-     * Advances from NEXT screen to either the next task's NOW screen or back to TODAY.
+     * Advances from NEXT screen to the next scheduled task's active workflow,
+     * or back to TODAY if all scheduled tasks are completed.
+     * Transitions the next scheduled task into active state (IN_PROGRESS) in Room if not already active.
      */
     fun startNextTask() {
         if (_uiState.value.isAllTasksCompleted) {
             _uiState.update { it.copy(currentScreen = LearnerScreen.TODAY) }
-        } else {
-            _uiState.update { it.copy(currentScreen = LearnerScreen.NOW) }
+            return
+        }
+
+        _uiState.update { it.copy(currentScreen = LearnerScreen.NOW, currentStepIndex = 0) }
+
+        val repo = activeRepository ?: return
+        mutationJob = viewModelScope.launch {
+            val next = repo.getNextScheduledTask(scheduleDate)
+            val targetTaskId = next
+                ?: currentActiveTaskId
+                ?: _uiState.value.task.id
+
+            repo.startTask(targetTaskId)
+            bindActiveTask(targetTaskId)
         }
     }
 

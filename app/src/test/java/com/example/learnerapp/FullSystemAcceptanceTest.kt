@@ -86,8 +86,8 @@ class FullSystemAcceptanceTest {
     fun tearDown() {
         activeViewModels.forEach { it.cleanup() }
         activeViewModels.clear()
-        database.close()
         Dispatchers.resetMain()
+        database.close()
     }
 
     // =========================================================================
@@ -173,8 +173,8 @@ class FullSystemAcceptanceTest {
         assertFalse(nextTaskTitle.contains("coming in", ignoreCase = true))
         assertFalse(nextTaskTitle.contains("demo", ignoreCase = true))
         assertFalse(nextTaskTitle.contains("placeholder", ignoreCase = true))
-        advanceUntilIdle()
         viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -203,6 +203,7 @@ class FullSystemAcceptanceTest {
         viewModel.startNextTask()
         advanceUntilIdle()
         database.invalidationTracker.refreshVersionsSync()
+        learnerRepository.getTaskProgress("sort_supplies").first { it?.status == "IN_PROGRESS" }
 
         // Wait for next active task (Sort supplies) to bind
         viewModel.uiState.first { it.task.title == "Sort supplies" }
@@ -218,7 +219,72 @@ class FullSystemAcceptanceTest {
         assertEquals("Sort supplies", schedule[0].title)
         assertEquals("NEXT", schedule[1].timeCategory)
         assertEquals("Clean work area", schedule[1].title)
+
+        // Verify Room persistence
+        val sortProgress = database.progressDao().getProgressForTask("sort_supplies")
+        assertEquals("IN_PROGRESS", sortProgress?.status)
+        val packProgress = database.progressDao().getProgressForTask("pack_one_parcel")
+        assertEquals("COMPLETED", packProgress?.status)
+
         viewModel.cleanup()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun startNextTask_activatesNextScheduledTask_transitionsToNowAndHow_andPackParcelRemainsCompleted() = runTest {
+        learnerRepository.seedIfEmpty()
+
+        val viewModel = createLearnerViewModel(todayStr)
+        viewModel.uiState.first { it.schedule.size == 3 }
+
+        // Start and complete Pack one parcel
+        viewModel.startTask()
+        advanceUntilIdle()
+        viewModel.completeTask()
+        advanceUntilIdle()
+        database.invalidationTracker.refreshVersionsSync()
+        viewModel.uiState.first { it.currentScreen == LearnerScreen.NEXT && it.schedule.firstOrNull()?.title == "Sort supplies" }
+
+        // Verify on NEXT screen
+        assertEquals(LearnerScreen.NEXT, viewModel.uiState.value.currentScreen)
+        assertEquals("Sort supplies", viewModel.uiState.value.schedule.first().title)
+
+        // Learner taps START on NEXT screen
+        viewModel.startNextTask()
+        advanceUntilIdle()
+        database.invalidationTracker.refreshVersionsSync()
+
+        // Wait for Sort supplies to bind as active task
+        viewModel.uiState.first { it.task.id == "sort_supplies" && it.currentScreen == LearnerScreen.NOW }
+
+        // Assert screen is NOW and active task is Sort supplies
+        assertEquals(LearnerScreen.NOW, viewModel.uiState.value.currentScreen)
+        assertEquals("sort_supplies", viewModel.uiState.value.task.id)
+        assertEquals("Sort supplies", viewModel.uiState.value.task.title)
+
+        // Assert dynamic schedule derivation: NOW is Sort supplies, NEXT is Clean work area
+        val updatedSchedule = viewModel.uiState.value.schedule
+        assertEquals("NOW", updatedSchedule[0].timeCategory)
+        assertEquals("Sort supplies", updatedSchedule[0].title)
+        assertTrue(updatedSchedule[0].isCurrent)
+        assertEquals("NEXT", updatedSchedule[1].timeCategory)
+        assertEquals("Clean work area", updatedSchedule[1].title)
+        assertFalse(updatedSchedule[1].isCurrent)
+
+        // Assert Room state: Pack one parcel is COMPLETED, Sort supplies is IN_PROGRESS
+        val packProgress = database.progressDao().getProgressForTask(DatabaseSeeder.TASK_ID_PACK_ONE_PARCEL)
+        assertEquals("COMPLETED", packProgress?.status)
+        val sortProgress = database.progressDao().getProgressForTask(DatabaseSeeder.TASK_ID_SORT_SUPPLIES)
+        assertEquals("IN_PROGRESS", sortProgress?.status)
+
+        // Advance into Sort supplies workflow
+        viewModel.startTask()
+        advanceUntilIdle()
+        assertEquals(LearnerScreen.HOW, viewModel.uiState.value.currentScreen)
+        assertEquals(0, viewModel.uiState.value.currentStepIndex)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -253,6 +319,7 @@ class FullSystemAcceptanceTest {
         assertTrue(vmRestart2.uiState.value.checklistItems.first { it.id == 1 }.isChecked)
         vmRestart1.cleanup()
         vmRestart2.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -290,8 +357,8 @@ class FullSystemAcceptanceTest {
         val schedule = viewModel.uiState.value.schedule
         assertEquals("NOW", schedule[0].timeCategory)
         assertEquals("Pack one parcel", schedule[0].title)
-        advanceUntilIdle()
         viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -312,6 +379,7 @@ class FullSystemAcceptanceTest {
         assertEquals(1, tomorrowScheduled.size)
         assertEquals(DatabaseSeeder.TASK_ID_CLEAN_WORK_AREA, tomorrowScheduled[0].task.id)
         todayVm.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -469,6 +537,7 @@ class FullSystemAcceptanceTest {
         assertFalse(vm.uiState.value.isHelpDialogOpen)
         assertEquals(0, vm.uiState.value.currentStepIndex)
         vm.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -559,6 +628,7 @@ class FullSystemAcceptanceTest {
         assertEquals(LearnerScreen.HOW, vm.uiState.value.currentScreen)
         assertEquals(2, vm.uiState.value.currentStepIndex)
         vm.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -638,6 +708,7 @@ class FullSystemAcceptanceTest {
         assertFalse(vm.uiState.value.isAllTasksCompleted)
         assertTrue(vm.uiState.value.schedule.isEmpty())
         vm.cleanup()
+        advanceUntilIdle()
     }
 
     // =========================================================================
@@ -670,7 +741,7 @@ class FullSystemAcceptanceTest {
         vm.navigateTo(LearnerScreen.CHECK)
         advanceUntilIdle()
         assertEquals(0, vm.uiState.value.checklistItems.size)
-        advanceUntilIdle()
         vm.cleanup()
+        advanceUntilIdle()
     }
 }

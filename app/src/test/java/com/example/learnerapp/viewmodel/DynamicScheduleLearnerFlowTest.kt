@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -39,6 +40,13 @@ class DynamicScheduleLearnerFlowTest {
     private lateinit var learnerRepository: RoomLearnerRepository
     private lateinit var scheduleRepository: RoomScheduleRepository
     private val todayStr = LocalDate.now().toString()
+    private val viewModels = mutableListOf<LearnerViewModel>()
+
+    private fun createViewModel(): LearnerViewModel {
+        val vm = LearnerViewModel(learnerRepository, todayStr)
+        viewModels.add(vm)
+        return vm
+    }
 
     @Before
     fun setUp() {
@@ -53,6 +61,8 @@ class DynamicScheduleLearnerFlowTest {
 
     @After
     fun tearDown() {
+        viewModels.forEach { it.cleanup() }
+        viewModels.clear()
         Dispatchers.resetMain()
         database.close()
     }
@@ -61,7 +71,7 @@ class DynamicScheduleLearnerFlowTest {
     fun dynamicSchedule_firstIncompleteIsNow_secondIsNext_remainingAreLater() = runTest {
         learnerRepository.seedIfEmpty()
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.size == 3 }
 
         val schedule = viewModel.uiState.value.schedule
@@ -81,6 +91,9 @@ class DynamicScheduleLearnerFlowTest {
         assertEquals("LATER", schedule[2].timeCategory)
         assertEquals("Clean work area", schedule[2].title)
         assertFalse(schedule[2].isCurrent)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -90,7 +103,7 @@ class DynamicScheduleLearnerFlowTest {
         database.scheduleDao().deleteScheduleItemsForTask(DatabaseSeeder.TASK_ID_SORT_SUPPLIES)
         database.scheduleDao().deleteScheduleItemsForTask(DatabaseSeeder.TASK_ID_CLEAN_WORK_AREA)
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.size == 1 }
 
         val schedule = viewModel.uiState.value.schedule
@@ -99,6 +112,9 @@ class DynamicScheduleLearnerFlowTest {
         assertEquals("Pack one parcel", schedule[0].title)
         assertFalse(viewModel.uiState.value.isScheduleEmpty)
         assertFalse(viewModel.uiState.value.isAllTasksCompleted)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -106,7 +122,7 @@ class DynamicScheduleLearnerFlowTest {
         learnerRepository.seedIfEmpty()
         database.scheduleDao().deleteScheduleItemsForTask(DatabaseSeeder.TASK_ID_CLEAN_WORK_AREA)
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.size == 2 }
 
         val schedule = viewModel.uiState.value.schedule
@@ -115,6 +131,9 @@ class DynamicScheduleLearnerFlowTest {
         assertEquals("Pack one parcel", schedule[0].title)
         assertEquals("NEXT", schedule[1].timeCategory)
         assertEquals("Sort supplies", schedule[1].title)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -124,19 +143,22 @@ class DynamicScheduleLearnerFlowTest {
         database.scheduleDao().deleteScheduleItemsForTask(DatabaseSeeder.TASK_ID_SORT_SUPPLIES)
         database.scheduleDao().deleteScheduleItemsForTask(DatabaseSeeder.TASK_ID_CLEAN_WORK_AREA)
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.isScheduleEmpty }
 
         assertTrue(viewModel.uiState.value.schedule.isEmpty())
         assertTrue(viewModel.uiState.value.isScheduleEmpty)
         assertFalse(viewModel.uiState.value.isAllTasksCompleted)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
     fun activeInProgressTask_remainsNow_evenIfStaffReordersSchedule() = runTest {
         learnerRepository.seedIfEmpty()
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         advanceUntilIdle()
 
         // Learner starts Pack one parcel and advances to Step 3
@@ -163,6 +185,9 @@ class DynamicScheduleLearnerFlowTest {
         val schedule = viewModel.uiState.value.schedule
         assertEquals("NOW", schedule[0].timeCategory)
         assertEquals("Pack one parcel", schedule[0].title)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -179,13 +204,16 @@ class DynamicScheduleLearnerFlowTest {
             )
         )
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.firstOrNull()?.title == "Sort supplies" }
 
         // Sort supplies must be NOW because it is CHECKING
         val schedule = viewModel.uiState.value.schedule
         assertEquals("NOW", schedule[0].timeCategory)
         assertEquals("Sort supplies", schedule[0].title)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -211,12 +239,15 @@ class DynamicScheduleLearnerFlowTest {
             )
         )
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.isNotEmpty() && it.schedule[0].title == "Pack one parcel" }
 
         // Earliest scheduled active task in order ASC (Pack parcel at order 1) is chosen as NOW
         assertEquals("NOW", viewModel.uiState.value.schedule[0].timeCategory)
         assertEquals("Pack one parcel", viewModel.uiState.value.schedule[0].title)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -227,7 +258,7 @@ class DynamicScheduleLearnerFlowTest {
         learnerRepository.toggleChecklistItem(DatabaseSeeder.TASK_ID_PACK_ONE_PARCEL, 1)
         database.invalidationTracker.refreshVersionsSync()
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         database.invalidationTracker.refreshVersionsSync()
         viewModel.uiState.first { it.currentStepIndex == 1 && it.checklistItems.firstOrNull { c -> c.id == 1 }?.isChecked == true }
 
@@ -249,6 +280,9 @@ class DynamicScheduleLearnerFlowTest {
         assertTrue(viewModel.uiState.value.checklistItems.first { it.id == 1 }.isChecked)
         assertEquals("NOW", viewModel.uiState.value.schedule[0].timeCategory)
         assertEquals("Pack one parcel", viewModel.uiState.value.schedule[0].title)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
@@ -259,20 +293,23 @@ class DynamicScheduleLearnerFlowTest {
         database.invalidationTracker.refreshVersionsSync()
 
         // Simulate fresh app launch with new ViewModel instance
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         database.invalidationTracker.refreshVersionsSync()
         viewModel.uiState.first { it.currentStepIndex == 3 }
 
         assertEquals("Pack one parcel", viewModel.uiState.value.task.title)
         assertEquals(3, viewModel.uiState.value.currentStepIndex) // Step 4 (index 3) restored
         assertEquals(LearnerScreen.HOW, viewModel.uiState.value.currentScreen)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
     fun taskCompletion_advancesToNextScheduledTask() = runTest {
         learnerRepository.seedIfEmpty()
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.size == 3 }
 
         assertEquals("Pack one parcel", viewModel.uiState.value.schedule[0].title)
@@ -300,13 +337,16 @@ class DynamicScheduleLearnerFlowTest {
         // Pack one parcel is COMPLETED in Room
         val packProgress = database.progressDao().getProgressForTask(DatabaseSeeder.TASK_ID_PACK_ONE_PARCEL)
         assertEquals("COMPLETED", packProgress?.status)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 
     @Test
     fun allTasksCompleted_showsAllCompleteState() = runTest {
         learnerRepository.seedIfEmpty()
 
-        val viewModel = LearnerViewModel(learnerRepository, todayStr)
+        val viewModel = createViewModel()
         viewModel.uiState.first { it.schedule.size == 3 }
 
         // Complete all 3 tasks
@@ -320,5 +360,56 @@ class DynamicScheduleLearnerFlowTest {
         assertTrue(viewModel.uiState.value.isAllTasksCompleted)
         assertTrue(viewModel.uiState.value.schedule.isEmpty())
         assertFalse(viewModel.uiState.value.isScheduleEmpty)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun completeMultiTaskFlow_packParcelThenSortSupplies_landsOnNextForCleanWorkArea_withoutReturningToToday() = runTest {
+        learnerRepository.seedIfEmpty()
+
+        val viewModel = createViewModel()
+        viewModel.uiState.first { it.schedule.size == 3 }
+
+        // 1. Pack one parcel is completed
+        viewModel.completeTask()
+        advanceUntilIdle()
+        database.invalidationTracker.refreshVersionsSync()
+        viewModel.uiState.first { it.schedule.firstOrNull()?.title == "Sort supplies" }
+
+        // 2. NEXT correctly shows Sort supplies
+        assertEquals(LearnerScreen.NEXT, viewModel.uiState.value.currentScreen)
+        assertEquals("Sort supplies", viewModel.uiState.value.schedule.first().title)
+
+        // 3. START SORT SUPPLIES is pressed
+        viewModel.startNextTask()
+        advanceUntilIdle()
+        database.invalidationTracker.refreshVersionsSync()
+        viewModel.uiState.first { it.task.id == "sort_supplies" && it.currentScreen == LearnerScreen.NOW }
+
+        // 4. Sort supplies becomes the active task
+        assertEquals(LearnerScreen.NOW, viewModel.uiState.value.currentScreen)
+        assertEquals("sort_supplies", viewModel.uiState.value.task.id)
+
+        // 5. Sort supplies is completed
+        viewModel.startTask()
+        advanceUntilIdle()
+        assertEquals(LearnerScreen.HOW, viewModel.uiState.value.currentScreen)
+
+        viewModel.completeTask()
+        advanceUntilIdle()
+        database.invalidationTracker.refreshVersionsSync()
+        viewModel.uiState.first { it.schedule.firstOrNull()?.title == "Clean work area" }
+
+        // 6. Must continue to NEXT/completion state, NOT return to TODAY
+        assertNotEquals(LearnerScreen.TODAY, viewModel.uiState.value.currentScreen)
+        assertEquals(LearnerScreen.NEXT, viewModel.uiState.value.currentScreen)
+        assertEquals("Clean work area", viewModel.uiState.value.schedule.first().title)
+        val sortProgress = database.progressDao().getProgressForTask(DatabaseSeeder.TASK_ID_SORT_SUPPLIES)
+        assertEquals("COMPLETED", sortProgress?.status)
+
+        viewModel.cleanup()
+        advanceUntilIdle()
     }
 }

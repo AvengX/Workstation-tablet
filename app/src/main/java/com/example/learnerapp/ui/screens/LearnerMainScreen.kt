@@ -129,8 +129,13 @@ fun LearnerMainScreen(
                         )
                     }
                     LearnerScreen.NEXT -> {
+                        val upcomingTitle = if (uiState.schedule.isNotEmpty()) {
+                            uiState.schedule.first().title
+                        } else {
+                            uiState.nextTaskTitle ?: uiState.task.title
+                        }
                         NextScreen(
-                            nextTaskTitle = uiState.nextTaskTitle,
+                            nextTaskTitle = upcomingTitle,
                             isAllTasksCompleted = uiState.isAllTasksCompleted,
                             onStartNextTask = { viewModel.startNextTask() }
                         )

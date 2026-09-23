@@ -32,6 +32,7 @@ interface LearnerRepository {
     suspend fun toggleChecklistItem(taskId: String, itemId: Int)
     suspend fun completeTask(taskId: String)
     suspend fun seedIfEmpty()
+    suspend fun getNextScheduledTask(date: String = LocalDate.now().toString()): String?
 }
 
 /**
@@ -230,5 +231,19 @@ class RoomLearnerRepository(
 
     override suspend fun seedIfEmpty() {
         DatabaseSeeder.seedIfEmpty(database)
+    }
+
+    override suspend fun getNextScheduledTask(date: String): String? {
+        val todayStr = LocalDate.now().toString()
+        val schedule = scheduleDao.getScheduleForDate(date, todayStr)
+        val allProgress = progressDao.getAllProgress().associateBy { it.taskId }
+        val inProgress = schedule.firstOrNull {
+            val status = allProgress[it.taskId]?.status
+            status == "IN_PROGRESS" || status == "CHECKING"
+        }
+        val next = inProgress ?: schedule.firstOrNull {
+            allProgress[it.taskId]?.status != "COMPLETED"
+        }
+        return next?.taskId
     }
 }
