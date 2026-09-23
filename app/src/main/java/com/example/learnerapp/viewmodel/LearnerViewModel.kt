@@ -58,9 +58,11 @@ class LearnerViewModel(
     private var hasRestoredSession = false
     private var currentActiveTaskId: String? = null
 
+    private var observeJob: Job? = null
     private var taskJob: Job? = null
     private var checklistJob: Job? = null
     private var progressJob: Job? = null
+    private var mutationJob: Job? = null
 
     init {
         observeRepositoryData()
@@ -70,7 +72,7 @@ class LearnerViewModel(
         val repo = activeRepository ?: return
 
         // Observe daily schedule and task progress dynamically
-        viewModelScope.launch {
+        observeJob = viewModelScope.launch {
             combine(
                 repo.getScheduledTasks(scheduleDate),
                 repo.getAllTaskProgress()
@@ -113,7 +115,6 @@ class LearnerViewModel(
                         )
                     }
                 } else {
-                    currentActiveTaskId = activeItem.task.id
                     val otherUncompleted = scheduledTasks.filter {
                         it != activeItem && progressMap[it.task.id]?.status != "COMPLETED"
                     }
@@ -272,7 +273,7 @@ class LearnerViewModel(
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
         val repo = activeRepository
         if (repo != null) {
-            viewModelScope.launch {
+            mutationJob = viewModelScope.launch {
                 repo.startTask(taskId)
             }
         }
@@ -293,22 +294,21 @@ class LearnerViewModel(
      */
     fun nextStep() {
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
-        _uiState.update { state ->
-            if (state.currentStepIndex < state.totalSteps - 1) {
-                val nextIndex = state.currentStepIndex + 1
-                activeRepository?.let { repo ->
-                    viewModelScope.launch {
-                        repo.updateCurrentStep(taskId, nextIndex + 1)
-                    }
+        val currentState = _uiState.value
+        if (currentState.currentStepIndex < currentState.totalSteps - 1) {
+            val nextIndex = currentState.currentStepIndex + 1
+            _uiState.update { it.copy(currentStepIndex = nextIndex) }
+            activeRepository?.let { repo ->
+                mutationJob = viewModelScope.launch {
+                    repo.updateCurrentStep(taskId, nextIndex + 1)
                 }
-                state.copy(currentStepIndex = nextIndex)
-            } else {
-                activeRepository?.let { repo ->
-                    viewModelScope.launch {
-                        repo.moveToChecking(taskId)
-                    }
+            }
+        } else {
+            _uiState.update { it.copy(currentScreen = LearnerScreen.CHECK) }
+            activeRepository?.let { repo ->
+                mutationJob = viewModelScope.launch {
+                    repo.moveToChecking(taskId)
                 }
-                state.copy(currentScreen = LearnerScreen.CHECK)
             }
         }
     }
@@ -319,17 +319,14 @@ class LearnerViewModel(
      */
     fun previousStep() {
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
-        _uiState.update { state ->
-            if (state.currentStepIndex > 0) {
-                val prevIndex = state.currentStepIndex - 1
-                activeRepository?.let { repo ->
-                    viewModelScope.launch {
-                        repo.updateCurrentStep(taskId, prevIndex + 1)
-                    }
+        val currentState = _uiState.value
+        if (currentState.currentStepIndex > 0) {
+            val prevIndex = currentState.currentStepIndex - 1
+            _uiState.update { it.copy(currentStepIndex = prevIndex) }
+            activeRepository?.let { repo ->
+                mutationJob = viewModelScope.launch {
+                    repo.updateCurrentStep(taskId, prevIndex + 1)
                 }
-                state.copy(currentStepIndex = prevIndex)
-            } else {
-                state
             }
         }
     }
@@ -341,7 +338,7 @@ class LearnerViewModel(
     fun toggleChecklistItem(itemId: Int) {
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
         activeRepository?.let { repo ->
-            viewModelScope.launch {
+            mutationJob = viewModelScope.launch {
                 repo.toggleChecklistItem(taskId, itemId)
             }
         }
@@ -381,7 +378,7 @@ class LearnerViewModel(
     fun completeTask() {
         val taskId = currentActiveTaskId ?: _uiState.value.task.id
         activeRepository?.let { repo ->
-            viewModelScope.launch {
+            mutationJob = viewModelScope.launch {
                 repo.completeTask(taskId)
             }
         }
@@ -485,5 +482,21 @@ class LearnerViewModel(
                 bindActiveTask(activeItem.task.id)
             }
         }
+    }
+
+    /**
+     * Cancels active jobs and Flow collectors.
+     */
+    fun cleanup() {
+        observeJob?.cancel()
+        taskJob?.cancel()
+        checklistJob?.cancel()
+        progressJob?.cancel()
+        mutationJob?.cancel()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        cleanup()
     }
 }

@@ -73,12 +73,21 @@ fun CheckScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                checklistItems.forEach { item ->
-                    ChecklistCard(
-                        item = item,
-                        onToggle = { onToggleItem(item.id) }
+                if (checklistItems.isEmpty()) {
+                    Text(
+                        text = "No inspection items required for this task. Tap CONTINUE to complete.",
+                        fontSize = 18.sp,
+                        color = TextMuted,
+                        modifier = Modifier.padding(vertical = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                } else {
+                    checklistItems.forEach { item ->
+                        ChecklistCard(
+                            item = item,
+                            onToggle = { onToggleItem(item.id) }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
 

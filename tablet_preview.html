@@ -77,7 +77,7 @@
             <span class="text-xs font-semibold text-slate-500">PACKING DESK B</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg">OPERATOR: ALEX M.</span>
+            
             <button onclick="openHelpModal()" class="h-10 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
               I NEED HELP
@@ -201,10 +201,10 @@
           <!-- SCREEN 6: NEXT -->
           <div id="screen-NEXT" class="screen absolute inset-0 p-8 flex flex-col justify-between hidden">
             <div>
-              <div class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold tracking-widest mb-3">UPCOMING TASK</div>
-              <h2 class="text-4xl font-extrabold text-[#16202E] tracking-tight mb-3">Sort supplies</h2>
-              <p class="text-slate-600 text-lg leading-relaxed max-w-2xl mb-6">
-                Your completed parcel has been recorded. Your next scheduled workstation assignment is Sort supplies.
+              <div id="learner-next-badge" class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold tracking-widest mb-3">UPCOMING TASK</div>
+              <h2 id="learner-next-title" class="text-4xl font-extrabold text-[#16202E] tracking-tight mb-3">Sort supplies</h2>
+              <p id="learner-next-desc" class="text-slate-600 text-lg leading-relaxed max-w-2xl mb-6">
+                Your completed work has been recorded. When ready, proceed with the next workstation assignment.
               </p>
             </div>
 
@@ -212,7 +212,7 @@
               <button onclick="navigateTo('TODAY')" class="h-14 px-6 border-2 border-slate-300 hover:bg-slate-100 text-slate-700 font-bold rounded-2xl transition-all">
                 VIEW SCHEDULE
               </button>
-              <button onclick="openNextTaskModal()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-2xl shadow-lg transition-all active:scale-95">
+              <button id="learner-next-action-btn" onclick="startNextScheduledTask()" class="h-14 px-10 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-2xl shadow-lg transition-all active:scale-95">
                 START SORT SUPPLIES
               </button>
             </div>
@@ -539,19 +539,7 @@
     </div>
   </div>
 
-  <!-- NEXT TASK PLACEHOLDER DIALOG -->
-  <div id="modal-next-task" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
-      <div class="w-16 h-16 bg-sky-100 text-sky-700 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-      </div>
-      <h3 class="text-2xl font-bold text-slate-900 mb-2">NEXT TASK</h3>
-      <p class="text-slate-600 text-lg mb-6">Task 'Sort Supplies' coming in Phase 2</p>
-      <button onclick="closeNextTaskModal()" class="w-full h-12 bg-[#006B75] hover:bg-[#005961] text-white font-bold text-lg rounded-xl transition-all">
-        OK
-      </button>
-    </div>
-  </div>
+
 
   <!-- EXIT STAFF MODE CONFIRMATION -->
   <div id="modal-exit-staff" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
@@ -1357,7 +1345,7 @@
 
     // LEARNER MODE DYNAMIC INTEGRATION
     function updateHowScreen() {
-      const activeSteps = taskStepsMap["pack_one_parcel"] || [];
+      const activeSteps = taskStepsMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       if (activeSteps.length === 0) {
         navigateTo("CHECK");
         return;
@@ -1395,7 +1383,7 @@
     }
 
     function renderChecklist() {
-      const activeChecklist = taskChecklistMap["pack_one_parcel"] || [];
+      const activeChecklist = taskChecklistMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       const container = document.getElementById("checklist-container");
       container.innerHTML = "";
 
@@ -1437,7 +1425,7 @@
     }
 
     function toggleCheckItem(idx) {
-      const activeChecklist = taskChecklistMap["pack_one_parcel"] || [];
+      const activeChecklist = taskChecklistMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       activeChecklist[idx].checked = !activeChecklist[idx].checked;
       renderChecklist();
     }
@@ -1471,13 +1459,13 @@
 
     function startTask() {
       currentStepIndex = 0;
-      const list = taskChecklistMap["pack_one_parcel"] || [];
+      const list = taskChecklistMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       list.forEach(i => i.checked = false);
       navigateTo("HOW");
     }
 
     function nextStep() {
-      const activeSteps = taskStepsMap["pack_one_parcel"] || [];
+      const activeSteps = taskStepsMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       if (currentStepIndex < activeSteps.length - 1) {
         currentStepIndex++;
         updateHowScreen();
@@ -1494,14 +1482,75 @@
     }
 
     function continueFromCheck() {
-      const list = taskChecklistMap["pack_one_parcel"] || [];
+      const list = taskChecklistMap[currentActiveLearnerTaskId || "pack_one_parcel"] || [];
       if (list.length === 0 || list.every(i => i.checked)) {
         navigateTo("DONE");
       }
     }
 
+    let currentActiveLearnerTaskId = "pack_one_parcel";
+
     function completeTask() {
+      // Mark active task as completed in progress map
+      taskProgressMap[currentActiveLearnerTaskId] = { status: "COMPLETED", currentStep: 1 };
+      updateLearnerDynamicSchedule();
+      updateNextScreen();
       navigateTo("NEXT");
+    }
+
+    function updateNextScreen() {
+      const todayList = dailySchedules[todayIso] || [];
+      const remainingUncompleted = todayList.filter(id => !taskProgressMap[id] || taskProgressMap[id].status !== "COMPLETED");
+      const nextTaskId = remainingUncompleted[0];
+
+      const badge = document.getElementById("learner-next-badge");
+      const title = document.getElementById("learner-next-title");
+      const desc = document.getElementById("learner-next-desc");
+      const btn = document.getElementById("learner-next-action-btn");
+
+      if (!nextTaskId) {
+        // All tasks completed
+        if (badge) {
+          badge.className = "inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold tracking-widest mb-3";
+          badge.innerText = "COMPLETE";
+        }
+        if (title) title.innerText = "ALL TODAY'S TASKS COMPLETE";
+        if (desc) desc.innerText = "All assigned workstation tasks for today have been completed. Please notify a member of staff.";
+        if (btn) {
+          btn.innerText = "VIEW TODAY'S SCHEDULE";
+          btn.onclick = () => navigateTo("TODAY");
+        }
+      } else {
+        const nextTask = tasksList.find(t => t.id === nextTaskId) || { title: nextTaskId, description: "" };
+        if (badge) {
+          badge.className = "inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold tracking-widest mb-3";
+          badge.innerText = "UPCOMING TASK";
+        }
+        if (title) title.innerText = nextTask.title;
+        if (desc) desc.innerText = `Your completed work has been recorded. When ready, proceed with ${nextTask.title}.`;
+        if (btn) {
+          btn.innerText = `START ${nextTask.title.toUpperCase()}`;
+          btn.onclick = () => startNextScheduledTask(nextTaskId);
+        }
+      }
+    }
+
+    function startNextScheduledTask(taskId) {
+      if (!taskId) {
+        navigateTo("TODAY");
+        return;
+      }
+      currentActiveLearnerTaskId = taskId;
+      taskProgressMap[taskId] = { status: "IN_PROGRESS", currentStep: 1 };
+      currentStepIndex = 0;
+      const list = taskChecklistMap[taskId] || [];
+      list.forEach(i => i.checked = false);
+
+      // Re-render learner screens for newly bound task
+      updateLearnerDynamicSchedule();
+      updateHowScreen();
+      renderChecklist();
+      navigateTo("NOW");
     }
 
     function openHelpModal() {
@@ -1511,12 +1560,8 @@
       document.getElementById("modal-help").classList.add("hidden");
     }
 
-    function openNextTaskModal() {
-      document.getElementById("modal-next-task").classList.remove("hidden");
-    }
-    function closeNextTaskModal() {
-      document.getElementById("modal-next-task").classList.add("hidden");
-    }
+    
+    
 
     // ==========================================
     // PHASE 6: DAILY SCHEDULES STATE & LOGIC

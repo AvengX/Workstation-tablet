@@ -144,7 +144,7 @@ fun StaffNoticeDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "STAFF MODE",
+                    text = "STAFF ACCESS",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextDark
@@ -153,7 +153,7 @@ fun StaffNoticeDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Staff Mode coming in Phase 2",
+                    text = "Enter the staff PIN to continue.",
                     fontSize = 22.sp,
                     color = TextMuted,
                     textAlign = TextAlign.Center
@@ -184,11 +184,12 @@ fun StaffNoticeDialog(
 }
 
 /**
- * Modal dialog when NEXT task START button is tapped in Phase 1.
+ * Modal dialog displaying the upcoming scheduled task details when requested.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NextTaskPlaceholderDialog(
+    taskTitle: String = "Sort supplies",
     onDismiss: () -> Unit
 ) {
     BasicAlertDialog(
@@ -226,9 +227,10 @@ fun NextTaskPlaceholderDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Task 'Sort Supplies' coming in Phase 2",
-                    fontSize = 22.sp,
-                    color = TextMuted,
+                    text = taskTitle,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextDark,
                     textAlign = TextAlign.Center
                 )
 
