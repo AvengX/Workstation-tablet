@@ -1,0 +1,18 @@
+{
+  "name": "APSN DSS Workplace Task Support Application",
+  "short_name": "DSS Task Support",
+  "description": "Browser-based workplace task-support application for APSN Delta Senior School students in authentic workplace settings.",
+  "start_url": "./tablet_preview.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0F172A",
+  "theme_color": "#0D7A75",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230D7A75'/%3E%3Cpath fill='%23ffffff' d='M384 128H128c-17.67 0-32 14.33-32 32v192c0 17.67 14.33 32 32 32h256c17.67 0 32-14.33 32-32V160c0-17.67-14.33-32-32-32zm-64 128l-96 64V160l96 64z'/%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
